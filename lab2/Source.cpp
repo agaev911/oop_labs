@@ -13,20 +13,30 @@ public:
 
 	DynamicArray(); //конструктор по умолчанию
 	DynamicArray(const DynamicArray&); //конструктор копировани€
+    DynamicArray(int); 
+    DynamicArray(int[], int); //конструктор из обычного массива
 
 	~DynamicArray(); //деструктор
     
+
     int arrayLength() { return arrayLength_; } //получение размера (количества хранимых элементов в насто€щий момент)
+
 
     bool insertAt(const int, const int); //вставка элемента по индексу. ≈сли индекс некорректный, вернуть false
 
     bool deleteAt(const int); //удаление элемента по индексу. ≈сли индекс некорректный, вернуть false
 
+    bool deleteEl(const int element); //удаление элемента по значению (первое вхождение). ≈сли элемент отсутствует в массиве, вернуть false
+    
+
+    int searchEl(const int) const;//поиск элемента(возвращает индекс первого совпавшего элемента, либо - 1, если совпадений нет);
+
+    bool swapArrays(DynamicArray&); //обмен содержимого с другим массивом(swap);
 
     friend ostream& operator <<(ostream& r, DynamicArray& s) //потоковый вывод
     {
         for (int curIdx = 0; curIdx < s.arrayLength_; ++curIdx)
-            r << s[curIdx];
+            r << s[curIdx]<< " ";
         return r;
     }
 
@@ -52,6 +62,16 @@ public:
 
 DynamicArray::DynamicArray() : arrayData_(nullptr), arrayLength_(0) {} //конструктор по умолчанию
 
+DynamicArray::DynamicArray(int initialLength) : arrayLength_(initialLength)
+{
+    arrayData_ = new int[initialLength];
+
+    for (int i = 0; i < arrayLength_; i++)
+    {
+        arrayData_[i] = 0;
+    }
+}
+
 DynamicArray::DynamicArray(const DynamicArray& otherArray) //конструктор копировани€
 {
     // ≈сли копируемый массив пуст, новый массив также будет пустым.
@@ -74,10 +94,29 @@ DynamicArray::DynamicArray(const DynamicArray& otherArray) //конструктор копиров
     }
 }
 
+DynamicArray::DynamicArray(int array[], int size) //конструктор из обычного массива
+{
+    arrayLength_ = size;
+    if (size == 0)
+    {
+        arrayData_ = nullptr;
+        arrayLength_ = 0;
+        return;
+    }
+
+    arrayData_ = new int[size];
+
+    for (int i = 0; i < size; ++i)
+    {
+        arrayData_[i] = array[i];
+    }
+}
+
 DynamicArray::~DynamicArray() //деструктор
 {
 	delete[] arrayData_;
 }
+
 
 bool DynamicArray::insertAt(const int index, const int value) //вставка элемента по индексу. ≈сли индекс некорректный, вернуть false
 {
@@ -135,13 +174,48 @@ bool DynamicArray::deleteAt(const int index) //удаление элемента по индексу. ≈сл
     {
         tempArrayData[curIdx] = arrayData_[curIdx];
     }
-
-   for (int curIdx = index; curIdx < arrayLength_; ++curIdx)
+    
+    for (int curIdx = index; curIdx < arrayLength_; ++curIdx)
     {
         tempArrayData[curIdx] = arrayData_[curIdx+1];
     }
 
     --arrayLength_;
+    
+    delete[] arrayData_;
+
+    arrayData_ = tempArrayData;
+
+    return true;
+}
+
+bool DynamicArray::deleteEl(const int element) //удаление элемента по значению (первое вхождение). ≈сли элемент отсутствует в массиве, вернуть false
+{
+    int index = -1;
+
+    for (int i = 0; i < arrayLength_; i++)
+    {
+        if (arrayData_[i] == element)
+        {
+            index = i;
+            break;
+        }
+    }
+    if (index == -1) return false;
+
+    int* tempArrayData = new int[arrayLength_ - 1];
+
+    for (int i = 0; i < index; i++)
+    {
+        tempArrayData[i] = arrayData_[i];
+    }
+
+    for (int i = index; i < arrayLength_ - 1; i++) 
+    {
+        tempArrayData[i] = arrayData_[i + 1];
+    }
+
+    arrayLength_--;
 
     delete[] arrayData_;
 
@@ -149,6 +223,34 @@ bool DynamicArray::deleteAt(const int index) //удаление элемента по индексу. ≈сл
 
     return true;
 }
+
+
+int DynamicArray::searchEl(const int element) const //поиск элемента(возвращает индекс первого совпавшего элемента, либо - 1, если совпадений нет);
+{
+    for (int i = 0; i < arrayLength_; i++)
+    {
+        if (arrayData_[i] == element)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+bool DynamicArray::swapArrays(DynamicArray& b) //- обмен содержимого с другим массивом(swap)
+{
+    int* tempData = arrayData_;
+    int tempLength = arrayLength_;
+
+    arrayData_ = b.arrayData_;
+    arrayLength_ = b.arrayLength_;
+
+    b.arrayData_ = tempData;
+    b.arrayLength_ = tempLength;
+
+    return true;
+}
+
 
 DynamicArray& DynamicArray::operator=(const DynamicArray& otherArray) //присваивание копированием(=)
 {
@@ -205,9 +307,25 @@ void DynamicArray::add(const int value)
 int main()
 {
     rus;
-    DynamicArray a;
+    
+    DynamicArray(a);
+    a.add(1);
+    a.add(2);
+    a.add(3);
+
+    DynamicArray(b);
+    b.add(6);
+    b.add(7);
+    b.add(8);
+    b.add(9);
+    b.add(10);
 
 
+    cout << a << a.arrayLength()<< endl << b << endl << endl;
+    a.swapArrays(b);
+    cout << a << a.arrayLength() << endl << b << b.arrayLength();
+
+   
 
     return 0;
 }

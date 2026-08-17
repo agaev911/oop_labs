@@ -3,6 +3,13 @@
 using namespace std;
 #define rus setlocale(LC_ALL, "rus");
 
+void Swap(int& a, int& b)
+{
+    int c;
+    c = a;
+    a = b;
+    b = c;
+}
 
 class DynamicArray
 {
@@ -14,13 +21,12 @@ public:
 	DynamicArray(); //конструктор по умолчанию
 	DynamicArray(const DynamicArray&); //конструктор копирования
     DynamicArray(int); 
-    DynamicArray(int[], int); //конструктор из обычного массива
+    DynamicArray(const int[], int); //конструктор из обычного массива
 
 	~DynamicArray(); //деструктор
     
 
     int arrayLength() { return arrayLength_; } //получение размера (количества хранимых элементов в настоящий момент)
-
 
     bool insertAt(const int, const int); //вставка элемента по индексу. Если индекс некорректный, вернуть false
 
@@ -28,15 +34,36 @@ public:
 
     bool deleteEl(const int element); //удаление элемента по значению (первое вхождение). Если элемент отсутствует в массиве, вернуть false
     
+    int searchEl(const int) const; //поиск элемента(возвращает индекс первого совпавшего элемента, либо - 1, если совпадений нет)
 
-    int searchEl(const int) const;//поиск элемента(возвращает индекс первого совпавшего элемента, либо - 1, если совпадений нет);
+    bool swapArrays(DynamicArray&); //обмен содержимого с другим массивом(swap)
 
-    bool swapArrays(DynamicArray&); //обмен содержимого с другим массивом(swap);
+
+    friend void Swap(int&, int&);
+    void sortArray(); //сортировка элементов (пузырёк)
+
 
     friend ostream& operator <<(ostream& r, DynamicArray& s) //потоковый вывод
     {
         for (int curIdx = 0; curIdx < s.arrayLength_; ++curIdx)
             r << s[curIdx]<< " ";
+        return r;
+    }
+
+    friend istream& operator>>(istream& r, DynamicArray& a) //потоковый ввод
+    {
+        int length;
+        cout << "\nВведите длину массива: "; cin >> length;
+
+        delete[]a.arrayData_;
+
+        a.arrayLength_ = length;
+        a.arrayData_ = new int[length];
+
+        cout << "\nВведите элементы массива через Enter:\n";
+        for (int i = 0; i < a.arrayLength_; i++)
+            cin >> a.arrayData_[i];
+
         return r;
     }
 
@@ -94,7 +121,7 @@ DynamicArray::DynamicArray(const DynamicArray& otherArray) //конструктор копиров
     }
 }
 
-DynamicArray::DynamicArray(int array[], int size) //конструктор из обычного массива
+DynamicArray::DynamicArray(const int array[], int size) //конструктор из обычного массива
 {
     arrayLength_ = size;
     if (size == 0)
@@ -111,6 +138,7 @@ DynamicArray::DynamicArray(int array[], int size) //конструктор из обычного масс
         arrayData_[i] = array[i];
     }
 }
+
 
 DynamicArray::~DynamicArray() //деструктор
 {
@@ -224,7 +252,6 @@ bool DynamicArray::deleteEl(const int element) //удаление элемента по значению (
     return true;
 }
 
-
 int DynamicArray::searchEl(const int element) const //поиск элемента(возвращает индекс первого совпавшего элемента, либо - 1, если совпадений нет);
 {
     for (int i = 0; i < arrayLength_; i++)
@@ -251,6 +278,13 @@ bool DynamicArray::swapArrays(DynamicArray& b) //- обмен содержимого с другим ма
     return true;
 }
 
+void DynamicArray::sortArray() //сортировка элементов(пузырёк);
+{
+    int i, j, f;
+    for (i = 0, f = 1; i < arrayLength_ - 1 && f; i++)
+        for(j=0,f=0;j<arrayLength_-i-1;j++)
+            if (arrayData_[j] > arrayData_[j + 1]) { Swap(arrayData_[j], arrayData_[j + 1]); f = 1; }
+}
 
 DynamicArray& DynamicArray::operator=(const DynamicArray& otherArray) //присваивание копированием(=)
 {
@@ -307,24 +341,10 @@ void DynamicArray::add(const int value)
 int main()
 {
     rus;
-    
-    DynamicArray(a);
-    a.add(1);
-    a.add(2);
-    a.add(3);
 
-    DynamicArray(b);
-    b.add(6);
-    b.add(7);
-    b.add(8);
-    b.add(9);
-    b.add(10);
-
-
-    cout << a << a.arrayLength()<< endl << b << endl << endl;
-    a.swapArrays(b);
-    cout << a << a.arrayLength() << endl << b << b.arrayLength();
-
+    DynamicArray b;
+    cin >> b;
+    cout << b;
    
 
     return 0;

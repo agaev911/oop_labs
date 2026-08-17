@@ -3,7 +3,7 @@
 using namespace std;
 #define rus setlocale(LC_ALL, "rus");
 
-void Swap(int& a, int& b)
+void Swap(int& a, int& b) //для сортировки
 {
     int c;
     c = a;
@@ -23,8 +23,17 @@ public:
     DynamicArray(int); 
     DynamicArray(const int[], int); //конструктор из обычного массива
 
+    DynamicArray(DynamicArray&&); //конструктор перемещения
+
+    DynamicArray& operator=(DynamicArray&&); //присваивание перемещением(= (DynamicArray && other))
+
+
 	~DynamicArray(); //деструктор
     
+
+    int getLength() const { return arrayLength_; }
+    int* getData() const { return arrayData_; }
+
 
     int arrayLength() { return arrayLength_; } //получение размера (количества хранимых элементов в настоящий момент)
 
@@ -42,6 +51,11 @@ public:
     friend void Swap(int&, int&);
     void sortArray(); //сортировка элементов (пузырёк)
 
+    //поиск максимального/минимального элемента
+    int maxEl()const;
+    int minEl()const;
+
+    bool deleteAllEl(int); //удаление всех элементов с заданным значением
 
     friend ostream& operator <<(ostream& r, DynamicArray& s) //потоковый вывод
     {
@@ -80,8 +94,6 @@ public:
         assert((index >= 0 && index < arrayLength_) && "Index is out of range.");
         return arrayData_[index];
     }
-
-
 
     void add(const int);
 };
@@ -139,6 +151,34 @@ DynamicArray::DynamicArray(const int array[], int size) //конструктор из обычног
     }
 }
 
+DynamicArray::DynamicArray(DynamicArray&& otherArray) //конструктор перемещения
+{
+    std::cout << "DynamicArray::DynamicArray(DynamicArray&&)" << std::endl;
+
+    arrayData_ = otherArray.arrayData_;
+    arrayLength_ = otherArray.arrayLength_;
+
+    otherArray.arrayData_ = nullptr;
+    otherArray.arrayLength_ = 0;
+}
+
+DynamicArray& DynamicArray::operator=(DynamicArray&& otherArray) //присваивание перемещением(= (DynamicArray && other))
+{
+    std::cout << "DynamicArray::operator=(DynamicArray&&)" << std::endl;
+
+    if (this != &otherArray)
+    {
+        delete[] arrayData_;
+
+        arrayData_ = otherArray.arrayData_;
+        arrayLength_ = otherArray.arrayLength_;
+
+        otherArray.arrayData_ = nullptr;
+        otherArray.arrayLength_ = 0;
+    }
+
+    return *this;
+}
 
 DynamicArray::~DynamicArray() //деструктор
 {
@@ -203,7 +243,7 @@ bool DynamicArray::deleteAt(const int index) //удаление элемента по индексу. Есл
         tempArrayData[curIdx] = arrayData_[curIdx];
     }
     
-    for (int curIdx = index; curIdx < arrayLength_; ++curIdx)
+    for (int curIdx = index; curIdx < arrayLength_-1; ++curIdx)
     {
         tempArrayData[curIdx] = arrayData_[curIdx+1];
     }
@@ -286,6 +326,51 @@ void DynamicArray::sortArray() //сортировка элементов(пузырёк);
             if (arrayData_[j] > arrayData_[j + 1]) { Swap(arrayData_[j], arrayData_[j + 1]); f = 1; }
 }
 
+//поиск максимального/минимального элемента
+int DynamicArray::maxEl()const
+{
+    int max = arrayData_[0];
+    for (int i = 1; i < arrayLength_; i++) if (arrayData_[i] > max) max = arrayData_[i];
+    return max;
+}
+int DynamicArray::minEl()const
+{
+    int min = arrayData_[0];
+    for (int i = 1; i < arrayLength_; i++) if (arrayData_[i] < min) min = arrayData_[i];
+    return min;
+}
+
+bool DynamicArray::deleteAllEl(const int value) //удаление всех элементов с заданным значением
+{
+    if (arrayLength_ == 0) return false;
+
+    int newLength = 0;
+    for (int i = 0; i < arrayLength_; ++i)
+    {
+        if (arrayData_[i] != value)
+            ++newLength;
+    }
+    if (newLength == arrayLength_) return false;
+
+    int* newArray = new int[newLength];
+    int newIndex = 0;
+
+    for (int i = 0; i < arrayLength_; ++i)
+    {
+        if (arrayData_[i] != value)
+        {
+            newArray[newIndex] = arrayData_[i];
+            ++newIndex;
+        }
+    }
+
+    delete[] arrayData_;
+    arrayData_ = newArray;
+    arrayLength_ = newLength;
+
+    return true;
+}
+
 DynamicArray& DynamicArray::operator=(const DynamicArray& otherArray) //присваивание копированием(=)
 {
     // Проверка на самоприсваивание: если это один и тот же объект, ничего не делаем.
@@ -334,7 +419,15 @@ void DynamicArray::add(const int value)
     arrayData_ = tempArrayData;
 }
 
-
+//получение итераторов на начало/конец массива (методы должны называться begin и end. Метод end должен возвращать итератор не на последний элемент, а за позицию после него);
+int* begin(const DynamicArray& array)
+{
+    return array.getData();
+}
+int* end(const DynamicArray& array)
+{
+    return array.getData() + array.getLength();
+}
 
 
 
@@ -343,9 +436,10 @@ int main()
     rus;
 
     DynamicArray b;
+    
     cin >> b;
-    cout << b;
-   
+
+    cout << b.maxEl() << " " << b.minEl();
 
     return 0;
 }

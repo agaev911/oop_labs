@@ -95,6 +95,15 @@ public:
         return arrayData_[index];
     }
 
+    //добавление элемента в конец массива(+и += )
+    DynamicArray operator+(int value); 
+    DynamicArray& operator+=(int value); 
+
+    //сложение(конкатенация) с другим массивом(здесь имеется в виду другим объектом нашего класса, а не стандартные массивы) (+и += );
+    DynamicArray operator+(const DynamicArray& other) const;
+    DynamicArray& operator+=(const DynamicArray&);
+
+
     void add(const int);
 };
 
@@ -402,6 +411,74 @@ DynamicArray& DynamicArray::operator=(const DynamicArray& otherArray) //присваив
     return *this;
 }
 
+
+//добавление элемента в конец массива(+и += )
+DynamicArray DynamicArray::operator+(int value)
+{
+    DynamicArray result(arrayLength_ + 1);
+
+    for (int i = 0; i < arrayLength_; ++i)
+        result.arrayData_[i] = arrayData_[i];
+
+    result.arrayData_[arrayLength_] = value;
+
+    return result;
+}
+DynamicArray& DynamicArray::operator+=(int value) 
+{
+    int* tempArrayData = new int[arrayLength_ + 1];
+    
+    for (int index = 0; index < arrayLength_; ++index)
+    {
+        tempArrayData[index] = arrayData_[index];
+    }
+
+    tempArrayData[arrayLength_] = value;
+    ++arrayLength_;
+
+    delete[] arrayData_;
+    arrayData_ = tempArrayData;
+
+    return *this;
+}
+
+//сложение(конкатенация) с другим массивом(здесь имеется в виду другим объектом нашего класса, а не стандартные массивы) (+и += )
+DynamicArray DynamicArray::operator+(const DynamicArray& other) const
+{
+    if (other.arrayLength_ == 0) return *this;
+
+    DynamicArray a(arrayLength_ + other.arrayLength_);
+
+    for (int i = 0; i < arrayLength_; ++i)
+        a.arrayData_[i] = arrayData_[i];
+
+    for (int i = 0; i < other.arrayLength_; ++i)
+        a.arrayData_[arrayLength_ + i] = other.arrayData_[i];
+
+    return a;
+}
+DynamicArray& DynamicArray::operator+=(const DynamicArray& other)
+{
+    if (other.arrayLength_ == 0) return *this;
+
+    int newLength = arrayLength_ + other.arrayLength_;
+    int* newData = new int[newLength];
+
+    for (int i = 0; i < arrayLength_; ++i)
+        newData[i] = arrayData_[i];
+
+    for (int i = 0; i < other.arrayLength_; ++i)
+        newData[arrayLength_ + i] = other.arrayData_[i];
+
+    delete[] arrayData_;
+    arrayData_ = newData;
+    arrayLength_ = newLength;
+
+    return *this;
+}
+
+
+
 void DynamicArray::add(const int value)
 {
     int* tempArrayData = new int[arrayLength_ + 1];
@@ -434,12 +511,11 @@ int* end(const DynamicArray& array)
 int main()
 {
     rus;
-
-    DynamicArray b;
+    DynamicArray a, b;
     
-    cin >> b;
+    
 
-    cout << b.maxEl() << " " << b.minEl();
+    cout << a;
 
     return 0;
 }

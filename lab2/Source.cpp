@@ -25,8 +25,8 @@ public:
 
     DynamicArray(DynamicArray&&); //конструктор перемещения
 
+    DynamicArray& operator=(const DynamicArray&); //присваивание копированием(= )
     DynamicArray& operator=(DynamicArray&&); //присваивание перемещением(= (DynamicArray && other))
-
 
 	~DynamicArray(); //деструктор
     
@@ -81,7 +81,6 @@ public:
         return r;
     }
 
-    DynamicArray& operator=(const DynamicArray&); //присваивание копированием(= )
 
     int& operator[](const int index) //получение ссылки на элемент по индексу ([ ])
     {
@@ -96,7 +95,7 @@ public:
     }
 
     //добавление элемента в конец массива(+и += )
-    DynamicArray operator+(int value); 
+    DynamicArray operator+(int value) const; 
     DynamicArray& operator+=(int value); 
 
     //сложение(конкатенация) с другим массивом(здесь имеется в виду другим объектом нашего класса, а не стандартные массивы) (+и += );
@@ -413,7 +412,7 @@ DynamicArray& DynamicArray::operator=(const DynamicArray& otherArray) //присваив
 
 
 //добавление элемента в конец массива(+и += )
-DynamicArray DynamicArray::operator+(int value)
+DynamicArray DynamicArray::operator+(int value) const
 {
     DynamicArray result(arrayLength_ + 1);
 
@@ -511,11 +510,8 @@ int* end(const DynamicArray& array)
 int main()
 {
     rus;
-    DynamicArray a, b;
-    
     
 
-    cout << a;
 
     return 0;
 }

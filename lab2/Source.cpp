@@ -312,7 +312,7 @@ int DynamicArray::searchEl(const int element) const //поиск элемента(возвращает 
     return -1;
 }
 
-bool DynamicArray::swapArrays(DynamicArray& b) //- обмен содержимого с другим массивом(swap)
+bool DynamicArray::swapArrays(DynamicArray& b) //обмен содержимого с другим массивом(swap)
 {
     int* tempData = arrayData_;
     int tempLength = arrayLength_;

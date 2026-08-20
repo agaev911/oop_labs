@@ -11,7 +11,13 @@ public:
     DynamicArray(int);
     DynamicArray(const DynamicArray&); //конструктор копирования
     DynamicArray(DynamicArray&&); //конструктор перемещения
+
+    DynamicArray(const ItemType[], int size); // конструктор из обычного массива
+
     ~DynamicArray(); //деструктор
+
+    bool swapArrays(DynamicArray&); //обмен содержимого с другим массивом(swap)
+
 
     DynamicArray& operator=(const DynamicArray&); //присваивание копированием(= )
     DynamicArray& operator=(DynamicArray&&); //присваивание перемещением (=(DynamicArray&& other))
@@ -89,6 +95,22 @@ DynamicArray<ItemType>::DynamicArray(const DynamicArray<ItemType>& otherArray)
     }
 }
 
+template<typename ItemType> // конструктор из обычного массива
+DynamicArray<ItemType>::DynamicArray(const ItemType array[], int size)
+{
+    arrayLength_ = size;
+    if (size == 0)
+    {
+        arrayData_ = nullptr;
+        arrayLength_ = 0;
+        return;
+    }
+
+    arrayData_ = new ItemType[size];
+    for (int i = 0; i < size; ++i)
+        arrayData_[i] = array[i];
+}
+
 template<typename ItemType> //конструктор перемещения
 DynamicArray<ItemType>::DynamicArray(DynamicArray<ItemType>&& otherArray)
 {
@@ -106,6 +128,23 @@ DynamicArray<ItemType>::~DynamicArray()
     std::cout << "DynamicArray::~DynamicArray()" << std::endl;
 
     delete[] arrayData_;
+}
+
+template<typename ItemType> //обмен содержимого с другим массивом(swap)
+bool DynamicArray<ItemType>::swapArrays(DynamicArray& b)
+{
+    if (this == &b) return true;
+
+    ItemType* tempData = arrayData_;
+    int tempLength = arrayLength_;
+
+    arrayData_ = b.arrayData_;
+    arrayLength_ = b.arrayLength_;
+
+    b.arrayData_ = tempData;
+    b.arrayLength_ = tempLength;
+
+    return true;
 }
 
 template<typename ItemType> //присваивание копированием(= )

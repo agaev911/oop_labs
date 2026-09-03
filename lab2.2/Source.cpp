@@ -68,6 +68,7 @@ public:
 
         cout << "\n¬ведите элементы массива через Enter:\n";
         for (int i = 0; i < a.arrayLength_; i++)
+
             r >> a.arrayData_[i];
 
         return r;

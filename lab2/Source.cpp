@@ -76,7 +76,7 @@ public:
 
         cout << "\n¬ведите элементы массива через Enter:\n";
         for (int i = 0; i < a.arrayLength_; i++)
-            cin >> a.arrayData_[i];
+            r >> a.arrayData_[i];
 
         return r;
     }
@@ -513,7 +513,9 @@ int main()
 {
     rus;
     
-
+    DynamicArray a;
+    cin >> a;
+    cout << a;
 
     return 0;
 }

@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <iostream>
 using namespace std;
+#define rus setlocale(LC_ALL, "rus");
 
 class BooleanVector
 {
@@ -12,7 +13,7 @@ public:
 
     BooleanVector() = default; //конструктор по умолчанию
     BooleanVector(const uint32_t, const bool); //конструктор с параметрами (размер и значение - одно и то же для всех разрядов)
-    BooleanVector(const char*);
+    BooleanVector(const char*); //конструктор из массива const char *
 
     ~BooleanVector();//деструктор
 
@@ -93,11 +94,47 @@ BooleanVector::BooleanVector(const uint32_t numBits, const bool initialValue)
 
     vectorData_ = new uint8_t[numBytes];
 
+
     uint8_t localInitialValue = initialValue ? 255 : 0;
 
     for (uint32_t byteIndex = 0; byteIndex < numBytes; byteIndex++)
     {
         vectorData_[byteIndex] = localInitialValue;
+    }
+}
+
+//конструктор из массива const char*
+BooleanVector::BooleanVector(const char* s)
+    : numBits_(strlen(s))
+{
+    if (numBits_ == 0) 
+    {
+        vectorData_ = nullptr;
+        return;
+    }
+
+    uint32_t numBytes = numBits_ / (8 * sizeof(uint8_t)); 
+    if (numBits_ % (8 * sizeof(uint8_t)) > 0)
+    {
+        numBytes += 1;
+    }
+
+    vectorData_ = new uint8_t[numBytes]; //выделяем место
+
+    // Обнуляем все байты
+    for (uint32_t i = 0; i < numBytes; i++) 
+    {
+        vectorData_[i] = 0;
+    }
+
+    // Устанавливаем биты из строки
+    for (uint32_t index = 0; index < numBits_; index++)
+    {
+        if (s[index] == '1') {
+            uint32_t byteIndex = index / (8 * sizeof(uint8_t)); //адрес байта
+            uint32_t bitIndex = index % (8 * sizeof(uint8_t));  //адрес бита
+            vectorData_[byteIndex] |= (1 << bitIndex);
+        }
     }
 }
 
@@ -237,14 +274,11 @@ BooleanVector::BitReference& BooleanVector::BitReference::operator=(const bool N
 
 int main()
 {
-    BooleanVector a(16, 1);
-    a[0] = 0;
-    a[2] = 0;
-    a[4] = 0;
-    a[6] = 0;
-    a[8] = 0;
+    rus;
+    const char* s = new char[8];
+    s = "01101111";
+    BooleanVector a(s);
 
     cout << a;
-    
     return 0;
 }

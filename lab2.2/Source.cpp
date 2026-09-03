@@ -2,6 +2,8 @@
 #include <assert.h>
 #include <random>
 
+using namespace std;
+
 template<typename ItemType>
 void Swap(ItemType& a, ItemType& b)
 {
@@ -46,17 +48,17 @@ public:
     }
 
     // ввод/вывод в консоль(потоковый)
-    friend std::ostream& operator<<(std::ostream& r, const DynamicArray<ItemType>& s)
+    friend ostream& operator<<(ostream& r, const DynamicArray<ItemType>& s)
     {
         for (int curIdx = 0; curIdx < s.arrayLength_; ++curIdx)
             r << s[curIdx] << " ";
         return r;
     }
 
-    friend std::istream& operator>>(std::istream& r, DynamicArray<ItemType>& a)
+    friend istream& operator>>(istream& r, DynamicArray<ItemType>& a)
     {
         int length;
-        std::cout << "\n¬ведите длину массива: ";
+        cout << "\n¬ведите длину массива: ";
         r >> length;
 
         delete[] a.arrayData_;
@@ -64,7 +66,7 @@ public:
         a.arrayLength_ = length;
         a.arrayData_ = new ItemType[length];
 
-        std::cout << "\n¬ведите элементы массива через Enter:\n";
+        cout << "\n¬ведите элементы массива через Enter:\n";
         for (int i = 0; i < a.arrayLength_; i++)
             r >> a.arrayData_[i];
 
@@ -107,16 +109,16 @@ private:
     int arrayLength_;
 };
 
-template<typename ItemType> ////конструктор по умолчанию
-DynamicArray<ItemType>::DynamicArray() : arrayData_(nullptr), arrayLength_(0) 
+template<typename ItemType> //конструктор по умолчанию
+DynamicArray<ItemType>::DynamicArray() : arrayData_(nullptr), arrayLength_(0)
 {
-    std::cout << "DynamicArray::DynamicArray()" << std::endl;
+    cout << "DynamicArray::DynamicArray()" << endl;
 }
 
 template<typename ItemType>
 DynamicArray<ItemType>::DynamicArray(int initialLength) : arrayLength_(initialLength)
 {
-    std::cout << "DynamicArray::DynamicArray(int)" << std::endl;
+    cout << "DynamicArray::DynamicArray(int)" << endl;
 
     arrayData_ = new ItemType[initialLength];
 
@@ -129,7 +131,7 @@ DynamicArray<ItemType>::DynamicArray(int initialLength) : arrayLength_(initialLe
 template<typename ItemType> //конструктор копировани€
 DynamicArray<ItemType>::DynamicArray(const DynamicArray<ItemType>& otherArray)
 {
-    std::cout << "DynamicArray::DynamicArray(const DynamicArray&)" << std::endl;
+    cout << "DynamicArray::DynamicArray(const DynamicArray&)" << endl;
 
     if (otherArray.arrayLength_ == 0)
     {
@@ -167,7 +169,7 @@ DynamicArray<ItemType>::DynamicArray(const ItemType array[], int size)
 template<typename ItemType> //конструктор перемещени€
 DynamicArray<ItemType>::DynamicArray(DynamicArray<ItemType>&& otherArray)
 {
-    std::cout << "DynamicArray::DynamicArray(DynamicArray&&)" << std::endl;
+    cout << "DynamicArray::DynamicArray(DynamicArray&&)" << endl;
 
     arrayData_ = otherArray.arrayData_;
     arrayLength_ = otherArray.arrayLength_;
@@ -178,7 +180,7 @@ DynamicArray<ItemType>::DynamicArray(DynamicArray<ItemType>&& otherArray)
 template<typename ItemType> //деструктор
 DynamicArray<ItemType>::~DynamicArray()
 {
-    std::cout << "DynamicArray::~DynamicArray()" << std::endl;
+    cout << "DynamicArray::~DynamicArray()" << endl;
 
     delete[] arrayData_;
 }
@@ -362,7 +364,7 @@ bool DynamicArray<ItemType>::deleteAllEl(const ItemType& value)
 template<typename ItemType> //присваивание копированием(= )
 DynamicArray<ItemType>& DynamicArray<ItemType>::operator=(const DynamicArray<ItemType>& otherArray)
 {
-    std::cout << "DynamicArray::operator=(const DynamicArray&)" << std::endl;
+    cout << "DynamicArray::operator=(const DynamicArray&)" << endl;
 
     if (this != &otherArray)
     {
@@ -391,7 +393,7 @@ DynamicArray<ItemType>& DynamicArray<ItemType>::operator=(const DynamicArray<Ite
 template<typename ItemType> //присваивание перемещением (=(DynamicArray&& other))
 DynamicArray<ItemType>& DynamicArray<ItemType>::operator=(DynamicArray<ItemType>&& otherArray)
 {
-    std::cout << "DynamicArray::operator=(DynamicArray&&)" << std::endl;
+    cout << "DynamicArray::operator=(DynamicArray&&)" << endl;
 
     if (this != &otherArray)
     {

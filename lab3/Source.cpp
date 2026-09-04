@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <iostream>
+#include <assert.h>
 using namespace std;
 #define rus setlocale(LC_ALL, "rus");
 
@@ -18,10 +19,10 @@ public:
     ~BooleanVector();//деструктор
 
     BooleanVector(const BooleanVector&); //конструктор копировани€
-    BooleanVector(BooleanVector&&);
+    BooleanVector(BooleanVector&&); //перемещающий конструктор
 
-    BooleanVector& operator=(const BooleanVector&);
-    BooleanVector& operator=(BooleanVector&&);
+    BooleanVector& operator=(const BooleanVector&); //присваивание(= )
+    BooleanVector& operator=(BooleanVector&&); //перемещающее присваивание
 
     bool SwapBV(BooleanVector&); //обмен содержимого с другим вектором(swap)
 
@@ -31,6 +32,26 @@ public:
     bool SetBits(uint32_t, uint32_t, bool); //установка в 0 / 1 k компонент, начина€ с i - ой
     bool SetAllBits(bool); //установка в 0 / 1 всех компонент вектора
 
+    //побитовое умножение (&, &=)
+    BooleanVector operator&(const BooleanVector& other) const;
+    BooleanVector& operator&=(const BooleanVector& other);
+
+    //побитовое сложение(| , |=)
+    BooleanVector operator|(const BooleanVector& other) const;
+    BooleanVector& operator|=(const BooleanVector& other);
+
+    //побитовое исключающее »Ћ»(^, ^=);
+    BooleanVector operator^(const BooleanVector& other) const;
+    BooleanVector& operator^=(const BooleanVector& other);
+
+    //побитовые сдвиги(<< , >> , <<=, >>=)
+    BooleanVector operator<<(uint32_t sdvig) const;
+    BooleanVector operator>>(uint32_t sdvig) const;
+    BooleanVector& operator<<=(uint32_t sdvig);
+    BooleanVector& operator>>=(uint32_t sdvig);
+    
+    //побитова€ инверси€(~)
+    BooleanVector operator~() const;
 
     //ввод / вывод в консоль(потоковый)
     friend ostream& operator <<(ostream& r, BooleanVector& s) //потоковый вывод
@@ -45,8 +66,7 @@ public:
         }
         return r;
     }
-
-    friend istream& operator>>(istream& r, BooleanVector& s)
+    friend istream& operator>>(istream& r, BooleanVector& s) //потоковый ввод
     {
         cout << "¬ведите количество битов: ";
         r >> s.numBits_;
@@ -81,7 +101,6 @@ public:
         }
         return r;
     }
-
 
     // простой вариант, но не позвол€ет установить значение конкретного бита с помощью присваивани€
 #if 0
@@ -208,6 +227,57 @@ BooleanVector::BooleanVector(const BooleanVector&v)
     }
 }
 
+//перемещающий конструктор
+BooleanVector::BooleanVector(BooleanVector&& other)
+    : vectorData_(other.vectorData_), numBits_(other.numBits_)        
+{
+    other.vectorData_ = nullptr;
+    other.numBits_ = 0;
+}
+
+//присваивание(= )
+BooleanVector& BooleanVector::operator=(const BooleanVector& other)
+{
+    if (this != &other) 
+    {
+        delete[] vectorData_;  // ќсвобождаем старую пам€ть
+
+        numBits_ = other.numBits_;
+
+        if (numBits_ == 0) {
+            vectorData_ = nullptr;
+        }
+        else {
+            uint32_t numBytes = (numBits_ + 7) / 8;
+            vectorData_ = new uint8_t[numBytes];
+
+            for (uint32_t i = 0; i < numBytes; i++) {
+                vectorData_[i] = other.vectorData_[i];
+            }
+        }
+    }
+
+    return *this;
+}
+
+BooleanVector& BooleanVector::operator=(BooleanVector&& other)
+{
+    if (this != &other)
+    {
+        delete[] vectorData_;  // ќсвобождаем старую пам€ть
+
+        // «абираем данные у other
+        vectorData_ = other.vectorData_;
+        numBits_ = other.numBits_;
+
+        // ќставл€ем other в пустом состо€нии
+        other.vectorData_ = nullptr;
+        other.numBits_ = 0;
+    }
+
+    return *this;
+}
+
 //обмен содержимого с другим вектором(swap)
 bool BooleanVector::SwapBV(BooleanVector& b)
 {
@@ -301,6 +371,205 @@ bool BooleanVector::SetAllBits(bool value)
 
     return true;
 }
+
+//побитовое умножение (&, &=)
+BooleanVector BooleanVector::operator&(const BooleanVector& other) const
+{
+    //длины должны совпадать
+    assert(numBits_ == other.numBits_ && "Index is out of range.");
+
+    BooleanVector result(numBits_, false);
+
+    uint32_t numBytes = numBits_ / (8 * sizeof(uint8_t));
+    if (numBits_ % (8 * sizeof(uint8_t)) > 0)
+    {
+        numBytes += 1;
+    }
+
+    for (uint32_t i = 0; i < numBytes; i++) {
+        result.vectorData_[i] = vectorData_[i] & other.vectorData_[i];
+    }
+
+    return result;
+}
+BooleanVector& BooleanVector::operator&=(const BooleanVector& other)
+{
+    assert(numBits_ == other.numBits_ && "Index is out of range");
+
+    uint32_t numBytes = numBits_ / (8 * sizeof(uint8_t));
+    if (numBits_ % (8 * sizeof(uint8_t)) > 0)
+    {
+        numBytes += 1;
+    }
+
+    for (uint32_t i = 0; i < numBytes; i++) {
+        vectorData_[i] &= other.vectorData_[i];
+    }
+
+    return *this;
+}
+
+//побитовое сложение(| , |=)
+BooleanVector BooleanVector::operator|(const BooleanVector& other) const
+{
+    assert(numBits_ == other.numBits_ && "Index is out of range");
+
+    BooleanVector result(numBits_, false);
+
+    uint32_t numBytes = numBits_ / (8 * sizeof(uint8_t));
+    if (numBits_ % (8 * sizeof(uint8_t)) > 0)
+    {
+        numBytes += 1;
+    }
+
+    for (uint32_t i = 0; i < numBytes; i++) {
+        result.vectorData_[i] = vectorData_[i] | other.vectorData_[i];
+    }
+
+    return result;
+}
+BooleanVector& BooleanVector::operator|=(const BooleanVector& other)
+{
+    assert(numBits_ == other.numBits_ && "Index is out of range");
+
+    uint32_t numBytes = numBits_ / (8 * sizeof(uint8_t));
+    if (numBits_ % (8 * sizeof(uint8_t)) > 0)
+    {
+        numBytes += 1;
+    }
+
+    for (uint32_t i = 0; i < numBytes; i++) {
+        vectorData_[i] |= other.vectorData_[i];
+    }
+
+    return *this;
+}
+
+//побитовое исключающее »Ћ» (^, ^=)
+BooleanVector BooleanVector::operator^(const BooleanVector& other) const
+{
+    assert(numBits_ == other.numBits_ && "Index is out of range");
+
+    BooleanVector result(numBits_, false);
+
+    uint32_t numBytes = numBits_ / (8 * sizeof(uint8_t));
+    if (numBits_ % (8 * sizeof(uint8_t)) > 0)
+    {
+        numBytes += 1;
+    }
+
+    for (uint32_t i = 0; i < numBytes; i++) {
+        result.vectorData_[i] = vectorData_[i] ^ other.vectorData_[i];
+    }
+
+    return result;
+}
+BooleanVector& BooleanVector::operator^=(const BooleanVector& other)
+{
+    assert(numBits_ == other.numBits_ && "Index is out of range");
+
+    uint32_t numBytes = numBits_ / (8 * sizeof(uint8_t));
+    if (numBits_ % (8 * sizeof(uint8_t)) > 0)
+    {
+        numBytes += 1;
+    }
+
+    for (uint32_t i = 0; i < numBytes; i++) {
+        vectorData_[i] ^= other.vectorData_[i];
+    }
+
+    return *this;
+}
+
+//побитовые сдвиги(<< , >> , <<=, >>=)
+BooleanVector BooleanVector::operator<<(uint32_t sdvig) const
+{
+    if (sdvig == 0) return *this;
+    if (sdvig >= numBits_) return BooleanVector(numBits_, false);
+
+    BooleanVector result(numBits_, false);
+
+    for (uint32_t i = 0; i < numBits_ - sdvig; i++)
+    {
+        if ((*this)[i]) result.SetBit(i + sdvig, true);
+    }
+
+    return result;
+}
+BooleanVector BooleanVector::operator>>(uint32_t sdvig) const
+{
+    if (sdvig == 0) return *this;
+    if (sdvig >= numBits_) return BooleanVector(numBits_, false);
+
+    BooleanVector result(numBits_, false);
+
+    for (uint32_t i = sdvig; i < numBits_; i++) {
+        if ((*this)[i]) result.SetBit(i - sdvig, true);
+    }
+
+    return result;
+}
+BooleanVector& BooleanVector::operator<<=(uint32_t sdvig)
+{
+    if (sdvig == 0) return *this;
+    if (sdvig >= numBits_) {
+        SetAllBits(false);
+        return *this;
+    }
+
+    //  опируем биты в новый массив
+    BooleanVector temp = *this;
+    SetAllBits(false);
+
+    for (uint32_t i = 0; i < numBits_ - sdvig; i++) {
+        if (temp[i]) SetBit(i + sdvig, true);
+    }
+
+    return *this;
+}
+BooleanVector& BooleanVector::operator>>=(uint32_t sdvig)
+{
+    if (sdvig == 0) return *this;
+    if (sdvig >= numBits_) {
+        SetAllBits(false);
+        return *this;
+    }
+
+    BooleanVector temp = *this;
+    SetAllBits(false);
+
+    for (uint32_t i = sdvig; i < numBits_; i++) {
+        if (temp[i]) SetBit(i - sdvig, true);
+    }
+
+    return *this;
+}
+
+//побитова€ инверси€(~)
+BooleanVector BooleanVector::operator~() const
+{
+    BooleanVector result(numBits_, false);
+
+    uint32_t numBytes = numBits_ / (8 * sizeof(uint8_t));
+    if (numBits_ % (8 * sizeof(uint8_t)) > 0)
+    {
+        numBytes += 1;
+    }
+
+    for (uint32_t i = 0; i < numBytes; i++) {
+        result.vectorData_[i] = ~vectorData_[i];
+    }
+
+    // ћаскировка лишних битов в последнем байте
+    if (numBits_ % 8 != 0) {
+        uint32_t lastByteIndex = numBytes - 1;
+        uint8_t mask = (1 << (numBits_ % 8)) - 1;
+        result.vectorData_[lastByteIndex] &= mask;
+    }
+
+    return result;
+}
+
 
 #if 0
 // простой вариант, но не позвол€ет установить значение конкретного бита с помощью присваивани€
@@ -397,9 +666,5 @@ int main()
 {
     rus;
     
-    BooleanVector a("111111"), b("1100");
-    cout << a << endl;
-    a.SetAllBits(0);
-    cout << a << endl;
     return 0;
 }

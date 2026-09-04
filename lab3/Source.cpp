@@ -49,7 +49,7 @@ public:
     BooleanVector operator>>(uint32_t sdvig) const;
     BooleanVector& operator<<=(uint32_t sdvig);
     BooleanVector& operator>>=(uint32_t sdvig);
-    
+
     //побитова€ инверси€(~)
     BooleanVector operator~() const;
 
@@ -112,7 +112,7 @@ public:
     uint32_t getLength() const { return numBits_; } //длина (количество бит) вектора
 
     uint32_t getWeight() const; //вес вектора (количество единичных компонент)
-    
+
     bool operator==(const BooleanVector& other) const;
 
 
@@ -121,6 +121,7 @@ private:
     uint8_t* vectorData_ = nullptr;
     uint32_t numBits_ = 0;
 };
+
 
 class BooleanVector::BitReference
 {
@@ -169,13 +170,13 @@ BooleanVector::BooleanVector(const uint32_t numBits, const bool initialValue)
 BooleanVector::BooleanVector(const char* s)
     : numBits_(strlen(s))
 {
-    if (numBits_ == 0) 
+    if (numBits_ == 0)
     {
         vectorData_ = nullptr;
         return;
     }
 
-    uint32_t numBytes = numBits_ / (8 * sizeof(uint8_t)); 
+    uint32_t numBytes = numBits_ / (8 * sizeof(uint8_t));
     if (numBits_ % (8 * sizeof(uint8_t)) > 0)
     {
         numBytes += 1;
@@ -184,7 +185,7 @@ BooleanVector::BooleanVector(const char* s)
     vectorData_ = new uint8_t[numBytes]; //выдел€ем место
 
     // ќбнул€ем все байты
-    for (uint32_t i = 0; i < numBytes; i++) 
+    for (uint32_t i = 0; i < numBytes; i++)
     {
         vectorData_[i] = 0;
     }
@@ -192,7 +193,8 @@ BooleanVector::BooleanVector(const char* s)
     // ”станавливаем биты из строки
     for (uint32_t index = 0; index < numBits_; index++)
     {
-        if (s[index] == '1') {
+        if (s[index] == '1') 
+        {
             uint32_t byteIndex = index / (8 * sizeof(uint8_t)); //адрес байта
             uint32_t bitIndex = index % (8 * sizeof(uint8_t));  //адрес бита
             vectorData_[byteIndex] |= (1 << bitIndex);
@@ -208,7 +210,7 @@ BooleanVector::~BooleanVector()
 }
 
 //конструктор копировани€
-BooleanVector::BooleanVector(const BooleanVector&v)
+BooleanVector::BooleanVector(const BooleanVector& v)
     :numBits_(v.numBits_)
 {
     uint32_t numBytes = numBits_ / (8 * sizeof(uint8_t));
@@ -228,7 +230,7 @@ BooleanVector::BooleanVector(const BooleanVector&v)
 
 //перемещающий конструктор
 BooleanVector::BooleanVector(BooleanVector&& other)
-    : vectorData_(other.vectorData_), numBits_(other.numBits_)        
+    : vectorData_(other.vectorData_), numBits_(other.numBits_)
 {
     other.vectorData_ = nullptr;
     other.numBits_ = 0;
@@ -237,20 +239,23 @@ BooleanVector::BooleanVector(BooleanVector&& other)
 //присваивание(= )
 BooleanVector& BooleanVector::operator=(const BooleanVector& other)
 {
-    if (this != &other) 
+    if (this != &other)
     {
         delete[] vectorData_;  // ќсвобождаем старую пам€ть
 
         numBits_ = other.numBits_;
 
-        if (numBits_ == 0) {
+        if (numBits_ == 0) 
+        {
             vectorData_ = nullptr;
         }
-        else {
+        else 
+        {
             uint32_t numBytes = (numBits_ + 7) / 8;
             vectorData_ = new uint8_t[numBytes];
 
-            for (uint32_t i = 0; i < numBytes; i++) {
+            for (uint32_t i = 0; i < numBytes; i++) 
+            {
                 vectorData_[i] = other.vectorData_[i];
             }
         }
@@ -298,12 +303,12 @@ bool BooleanVector::InvertInd(uint32_t i)
     uint32_t bitIndex = i % (8 * sizeof(uint8_t));
 
     vectorData_[byteIndex] ^= (1 << bitIndex);
-    
+
     return true;
 }
 
 //установка в 0 / 1 i - ой компоненты
-bool BooleanVector::SetBit(uint32_t i, bool value) 
+bool BooleanVector::SetBit(uint32_t i, bool value)
 {
     if (i >= numBits_) return false;
 
@@ -323,10 +328,10 @@ bool BooleanVector::SetBits(uint32_t i, uint32_t k, bool value)
 
     if (k == 0) return true;
 
-    uint32_t finish = i + k; 
+    uint32_t finish = i + k;
     if (finish > numBits_) return false;
 
-    for (; i < finish ;i++)
+    for (; i < finish; i++)
     {
         uint32_t byteIndex = i / (8 * sizeof(uint8_t));
         uint32_t bitIndex = i % (8 * sizeof(uint8_t));
@@ -606,7 +611,7 @@ bool BooleanVector::operator==(const BooleanVector& other) const
         if (vectorData_[byteIndex] != other.vectorData_[byteIndex]) return false;
     }
 
-	// ѕодумайте над тем, как заменить этот цикл одним сравнением
+    // ѕодумайте над тем, как заменить этот цикл одним сравнением
     for (uint32_t bitIndex = 0; bitIndex < numBits_ % 8; bitIndex++)
     {
         if ((vectorData_[numBytes - 1] & (1 << bitIndex)) != (other.vectorData_[numBytes - 1] & (1 << bitIndex))) return false;
@@ -641,11 +646,10 @@ BooleanVector::BitReference& BooleanVector::BitReference::operator=(const bool N
     return *this;
 }
 
-
-
 int main()
 {
-    rus;
-    
+
+
+
     return 0;
 }

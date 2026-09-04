@@ -25,6 +25,13 @@ public:
 
     bool SwapBV(BooleanVector&); //обмен содержимого с другим вектором(swap)
 
+    bool InvertBV(); //инверсия всех компонент вектора
+    bool InvertInd(uint32_t); //инверсия i-ой компоненты
+    bool SetBit(uint32_t, bool); //инверсия i-ой компоненты
+    bool SetBits(uint32_t, uint32_t, bool); //установка в 0 / 1 k компонент, начиная с i - ой
+    bool SetAllBits(bool); //установка в 0 / 1 всех компонент вектора
+
+
     //ввод / вывод в консоль(потоковый)
     friend ostream& operator <<(ostream& r, BooleanVector& s) //потоковый вывод
     {
@@ -39,7 +46,7 @@ public:
         return r;
     }
 
-    friend istream& operator>>(std::istream& r, BooleanVector& s)
+    friend istream& operator>>(istream& r, BooleanVector& s)
     {
         cout << "Введите количество битов: ";
         r >> s.numBits_;
@@ -218,6 +225,83 @@ bool BooleanVector::SwapBV(BooleanVector& b)
     return true;
 }
 
+//инверсия всех компонент вектора
+bool BooleanVector::InvertBV()
+{
+    for (uint32_t bit = 0; bit < numBits_; bit++)
+    {
+        uint32_t byteIndex = bit / (8 * sizeof(uint8_t));
+        uint32_t bitIndex = bit % (8 * sizeof(uint8_t));
+
+        vectorData_[byteIndex] ^= (1 << bitIndex);
+    }
+    return true;
+}
+
+//инверсия i-ой компоненты
+bool BooleanVector::InvertInd(uint32_t i)
+{
+    if (i >= numBits_) return false;
+
+    uint32_t byteIndex = i / (8 * sizeof(uint8_t));
+    uint32_t bitIndex = i % (8 * sizeof(uint8_t));
+
+    vectorData_[byteIndex] ^= (1 << bitIndex);
+    
+    return true;
+}
+
+//установка в 0 / 1 i - ой компоненты
+bool BooleanVector::SetBit(uint32_t i, bool value) 
+{
+    if (i >= numBits_) return false;
+
+    uint32_t byteIndex = i / (8 * sizeof(uint8_t));
+    uint32_t bitIndex = i % (8 * sizeof(uint8_t));
+
+    if (value) vectorData_[byteIndex] |= (1 << bitIndex);
+    else vectorData_[byteIndex] &= ~(1 << bitIndex);
+
+    return true;
+}
+
+//установка в 0 / 1 k компонент, начиная с i - ой
+bool BooleanVector::SetBits(uint32_t i, uint32_t k, bool value)
+{
+    if (i >= numBits_) return false;
+
+    if (k == 0) return true;
+
+    uint32_t finish = i + k; 
+    if (finish > numBits_) return false;
+
+    for (; i < finish ;i++)
+    {
+        uint32_t byteIndex = i / (8 * sizeof(uint8_t));
+        uint32_t bitIndex = i % (8 * sizeof(uint8_t));
+
+        if (value) vectorData_[byteIndex] |= (1 << bitIndex);
+        else vectorData_[byteIndex] &= ~(1 << bitIndex);
+    }
+
+    return true;
+}
+
+//установка в 0 / 1 всех компонент вектора
+bool BooleanVector::SetAllBits(bool value)
+{
+    for (uint32_t i = 0; i < numBits_; i++)
+    {
+        uint32_t byteIndex = i / (8 * sizeof(uint8_t));
+        uint32_t bitIndex = i % (8 * sizeof(uint8_t));
+
+        if (value) vectorData_[byteIndex] |= (1 << bitIndex);
+        else vectorData_[byteIndex] &= ~(1 << bitIndex);
+    }
+
+    return true;
+}
+
 #if 0
 // простой вариант, но не позволяет установить значение конкретного бита с помощью присваивания
 bool BooleanVector::operator[](const uint32_t index) const
@@ -313,9 +397,9 @@ int main()
 {
     rus;
     
-    BooleanVector a;
-
-    cin >> a;
-    cout << a;
+    BooleanVector a("111111"), b("1100");
+    cout << a << endl;
+    a.SetAllBits(0);
+    cout << a << endl;
     return 0;
 }

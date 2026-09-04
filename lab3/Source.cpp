@@ -39,6 +39,42 @@ public:
         return r;
     }
 
+    friend istream& operator>>(std::istream& r, BooleanVector& s)
+    {
+        cout << "Введите количество битов: ";
+        r >> s.numBits_;
+
+        uint32_t numBytes = s.numBits_ / (8 * sizeof(uint8_t));
+        if (s.numBits_ % (8 * sizeof(uint8_t)) > 0)
+        {
+            numBytes += 1;
+        }
+
+        s.vectorData_ = new uint8_t[numBytes]; //выделяем место
+
+        // Обнуляем все байты
+        for (uint32_t i = 0; i < numBytes; i++)
+        {
+            s.vectorData_[i] = 0;
+        }
+
+        cout << "Введите биты (0 или 1 через пробел): " << endl;
+        // Устанавливаем биты из строки
+        for (uint32_t index = 0; index < s.numBits_; index++)
+        {
+            bool value;
+            r >> value;  // Читаем 0 или 1
+
+            if (value)
+            {
+                uint32_t byteIndex = index / (8 * sizeof(uint8_t)); //адрес байта
+                uint32_t bitIndex = index % (8 * sizeof(uint8_t));  //адрес бита
+                s.vectorData_[byteIndex] |= (1 << bitIndex);
+            }
+        }
+        return r;
+    }
+
 
     // простой вариант, но не позволяет установить значение конкретного бита с помощью присваивания
 #if 0
@@ -59,6 +95,7 @@ private:
     uint8_t* vectorData_ = nullptr;
     uint32_t numBits_ = 0;
 };
+
 
 class BooleanVector::BitReference
 {
@@ -275,10 +312,10 @@ BooleanVector::BitReference& BooleanVector::BitReference::operator=(const bool N
 int main()
 {
     rus;
-    const char* s = new char[8];
-    s = "01101111";
-    BooleanVector a(s);
+    
+    BooleanVector a;
 
+    cin >> a;
     cout << a;
     return 0;
 }

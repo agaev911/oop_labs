@@ -193,8 +193,7 @@ BooleanVector::BooleanVector(const char* s)
     // Устанавливаем биты из строки
     for (uint32_t index = 0; index < numBits_; index++)
     {
-        if (s[index] == '1') 
-        {
+        if (s[index] == '1') {
             uint32_t byteIndex = index / (8 * sizeof(uint8_t)); //адрес байта
             uint32_t bitIndex = index % (8 * sizeof(uint8_t));  //адрес бита
             vectorData_[byteIndex] |= (1 << bitIndex);
@@ -245,20 +244,35 @@ BooleanVector& BooleanVector::operator=(const BooleanVector& other)
 
         numBits_ = other.numBits_;
 
-        if (numBits_ == 0) 
-        {
+        if (numBits_ == 0) {
             vectorData_ = nullptr;
         }
-        else 
-        {
+        else {
             uint32_t numBytes = (numBits_ + 7) / 8;
             vectorData_ = new uint8_t[numBytes];
 
-            for (uint32_t i = 0; i < numBytes; i++) 
-            {
+            for (uint32_t i = 0; i < numBytes; i++) {
                 vectorData_[i] = other.vectorData_[i];
             }
         }
+    }
+
+    return *this;
+}
+
+BooleanVector& BooleanVector::operator=(BooleanVector&& other)
+{
+    if (this != &other)
+    {
+        delete[] vectorData_;  // Освобождаем старую память
+
+        // Забираем данные у other
+        vectorData_ = other.vectorData_;
+        numBits_ = other.numBits_;
+
+        // Оставляем other в пустом состоянии
+        other.vectorData_ = nullptr;
+        other.numBits_ = 0;
     }
 
     return *this;

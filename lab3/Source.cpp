@@ -122,7 +122,6 @@ private:
     uint32_t numBits_ = 0;
 };
 
-
 class BooleanVector::BitReference
 {
 public:
@@ -255,24 +254,6 @@ BooleanVector& BooleanVector::operator=(const BooleanVector& other)
                 vectorData_[i] = other.vectorData_[i];
             }
         }
-    }
-
-    return *this;
-}
-
-BooleanVector& BooleanVector::operator=(BooleanVector&& other)
-{
-    if (this != &other)
-    {
-        delete[] vectorData_;  // Освобождаем старую память
-
-        // Забираем данные у other
-        vectorData_ = other.vectorData_;
-        numBits_ = other.numBits_;
-
-        // Оставляем other в пустом состоянии
-        other.vectorData_ = nullptr;
-        other.numBits_ = 0;
     }
 
     return *this;

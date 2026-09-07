@@ -24,6 +24,12 @@ public:
     BooleanVector& operator[](const uint32_t);
     const BooleanVector& operator[](const uint32_t) const;
 
+    void swapMatrix(BooleanMatrix& other);//обмен содержимого с другой матрицей (swap)
+
+    uint32_t getWeight() const; //вес матрицы(количество единичных компонент)
+
+    uint32_t rowWeight(uint32_t rowIndex) const; //вес j - ой строки
+
 private:
 
     DynamicArray<BooleanVector> matrixData_;

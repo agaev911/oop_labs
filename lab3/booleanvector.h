@@ -55,7 +55,7 @@ public:
     BooleanVector operator~() const;
 
     //ввод / вывод в консоль(потоковый)
-    friend ostream& operator <<(ostream& r, BooleanVector& s) //потоковый вывод
+    friend ostream& operator <<(ostream& r, const BooleanVector& s) //потоковый вывод
     {
         for (uint32_t index = 0; index < s.numBits_; index++)
         {

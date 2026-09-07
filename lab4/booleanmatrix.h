@@ -30,6 +30,16 @@ public:
 
     uint32_t rowWeight(uint32_t rowIndex) const; //вес j - ой строки
 
+    BooleanVector conjunctionRows() const; //конъюнкция всех строк(возвращает булев вектор)
+    BooleanVector disjunctionRows() const; //дизъюнкция всех строк(возвращает булев вектор)
+
+    void invertRowBit(uint32_t rowIndex, uint32_t colIndex); //инверсия в i - ой компоненты j - ой строки
+    void invertRowBits(uint32_t rowIndex, uint32_t startCol, uint32_t count); //инверсия k компонент j - ой строки, начиная с i - ой компоненты
+
+    void setRowBit(uint32_t rowIndex, uint32_t colIndex, bool value); //установка в 0 / 1 i - ой компоненты j - ой строки
+    void setRowBits(uint32_t rowIndex, uint32_t startCol, uint32_t count, bool value); //установка в 0 / 1 k компонент j - ой строки, начиная с i - ой компоненты
+
+
 private:
 
     DynamicArray<BooleanVector> matrixData_;

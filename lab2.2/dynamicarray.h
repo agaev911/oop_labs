@@ -112,14 +112,11 @@ private:
 template<typename ItemType> //конструктор по умолчанию
 DynamicArray<ItemType>::DynamicArray() : arrayData_(nullptr), arrayLength_(0)
 {
-    cout << "DynamicArray::DynamicArray()" << endl;
 }
 
 template<typename ItemType>
 DynamicArray<ItemType>::DynamicArray(int initialLength) : arrayLength_(initialLength)
 {
-    cout << "DynamicArray::DynamicArray(int)" << endl;
-
     arrayData_ = new ItemType[initialLength];
 
     for (int i = 0; i < arrayLength_; i++)
@@ -131,8 +128,6 @@ DynamicArray<ItemType>::DynamicArray(int initialLength) : arrayLength_(initialLe
 template<typename ItemType> //конструктор копирования
 DynamicArray<ItemType>::DynamicArray(const DynamicArray<ItemType>& otherArray)
 {
-    cout << "DynamicArray::DynamicArray(const DynamicArray&)" << endl;
-
     if (otherArray.arrayLength_ == 0)
     {
         arrayData_ = nullptr;
@@ -169,8 +164,6 @@ DynamicArray<ItemType>::DynamicArray(const ItemType array[], int size)
 template<typename ItemType> //конструктор перемещения
 DynamicArray<ItemType>::DynamicArray(DynamicArray<ItemType>&& otherArray)
 {
-    cout << "DynamicArray::DynamicArray(DynamicArray&&)" << endl;
-
     arrayData_ = otherArray.arrayData_;
     arrayLength_ = otherArray.arrayLength_;
     otherArray.arrayData_ = nullptr;
@@ -180,8 +173,6 @@ DynamicArray<ItemType>::DynamicArray(DynamicArray<ItemType>&& otherArray)
 template<typename ItemType> //деструктор
 DynamicArray<ItemType>::~DynamicArray()
 {
-    cout << "DynamicArray::~DynamicArray()" << endl;
-
     delete[] arrayData_;
 }
 
@@ -364,8 +355,6 @@ bool DynamicArray<ItemType>::deleteAllEl(const ItemType& value)
 template<typename ItemType> //присваивание копированием(= )
 DynamicArray<ItemType>& DynamicArray<ItemType>::operator=(const DynamicArray<ItemType>& otherArray)
 {
-    cout << "DynamicArray::operator=(const DynamicArray&)" << endl;
-
     if (this != &otherArray)
     {
         delete[] arrayData_;
@@ -393,8 +382,6 @@ DynamicArray<ItemType>& DynamicArray<ItemType>::operator=(const DynamicArray<Ite
 template<typename ItemType> //присваивание перемещением (=(DynamicArray&& other))
 DynamicArray<ItemType>& DynamicArray<ItemType>::operator=(DynamicArray<ItemType>&& otherArray)
 {
-    cout << "DynamicArray::operator=(DynamicArray&&)" << endl;
-
     if (this != &otherArray)
     {
         delete[] arrayData_;

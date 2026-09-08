@@ -47,7 +47,7 @@ istream& operator>>(istream& r, BooleanMatrix& matrix) //ввод
 {
     uint32_t numRows, numColumns;
 
-    cout << "Введите количество строк, столбцов и значения разрядов: /n";
+    cout << "Введите количество строк, столбцов и значения разрядов: \n";
     r >> numRows >> numColumns;
 
     matrix = BooleanMatrix(numRows, numColumns, false);
@@ -148,4 +148,111 @@ void BooleanMatrix::setRowBits(uint32_t rowIndex, uint32_t startCol, uint32_t co
             matrixData_[rowIndex].SetBit(startCol + i, value);
         }
     }
+}
+
+//присваивание(= )
+BooleanMatrix& BooleanMatrix::operator=(const BooleanMatrix& other)
+{
+    if (this != &other)
+    {
+        matrixData_ = other.matrixData_;
+    }
+    return *this;
+}
+
+//построчное побитовое умножение(&, &=)
+BooleanMatrix BooleanMatrix::operator&(const BooleanMatrix& other) const
+{
+    assert(numRows() == other.numRows() && numColumns() == other.numColumns()
+        && "Index is out of range.");
+
+    BooleanMatrix result(numRows(), numColumns(), false);
+
+    for (uint32_t i = 0; i < numRows(); ++i)
+    {
+        result.matrixData_[i] = matrixData_[i] & other.matrixData_[i];
+    }
+
+    return result;
+}
+BooleanMatrix& BooleanMatrix::operator&=(const BooleanMatrix& other)
+{
+    assert(numRows() == other.numRows() && numColumns() == other.numColumns()
+        && "Index is out of range.");
+
+    for (uint32_t i = 0; i < numRows(); ++i)
+    {
+        matrixData_[i] &= other.matrixData_[i];
+    }
+
+    return *this;
+}
+
+//построчное побитовое сложение(| , |=)
+BooleanMatrix BooleanMatrix::operator|(const BooleanMatrix& other) const
+{
+    assert(numRows() == other.numRows() && numColumns() == other.numColumns()
+        && "Index is out of range.");
+
+    BooleanMatrix result(numRows(), numColumns(), false);
+
+    for (uint32_t i = 0; i < numRows(); ++i)
+    {
+        result.matrixData_[i] = matrixData_[i] | other.matrixData_[i];
+    }
+
+    return result;
+}
+BooleanMatrix& BooleanMatrix::operator|=(const BooleanMatrix& other)
+{
+    assert(numRows() == other.numRows() && numColumns() == other.numColumns()
+        && "Index is out of range.");
+
+    for (uint32_t i = 0; i < numRows(); ++i)
+    {
+        matrixData_[i] |= other.matrixData_[i];
+    }
+
+    return *this;
+}
+
+//построчное побитовое исключающее ИЛИ(^, ^=)
+BooleanMatrix BooleanMatrix::operator^(const BooleanMatrix& other) const
+{
+    assert(numRows() == other.numRows() && numColumns() == other.numColumns()
+        && "Index is out of range.");
+
+    BooleanMatrix result(numRows(), numColumns(), false);
+
+    for (uint32_t i = 0; i < numRows(); ++i)
+    {
+        result.matrixData_[i] = matrixData_[i] ^ other.matrixData_[i];
+    }
+
+    return result;
+}
+BooleanMatrix& BooleanMatrix::operator^=(const BooleanMatrix& other)
+{
+    assert(numRows() == other.numRows() && numColumns() == other.numColumns()
+        && "Index is out of range.");
+
+    for (uint32_t i = 0; i < numRows(); ++i)
+    {
+        matrixData_[i] ^= other.matrixData_[i];
+    }
+
+    return *this;
+}
+
+//построчная побитовая инверсия (~)
+BooleanMatrix BooleanMatrix::operator~() const
+{
+    BooleanMatrix result(numRows(), numColumns(), false);
+
+    for (uint32_t i = 0; i < numRows(); ++i)
+    {
+        result.matrixData_[i] = ~matrixData_[i];
+    }
+
+    return result;
 }

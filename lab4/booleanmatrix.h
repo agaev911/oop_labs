@@ -39,6 +39,23 @@ public:
     void setRowBit(uint32_t rowIndex, uint32_t colIndex, bool value); //установка в 0 / 1 i - ой компоненты j - ой строки
     void setRowBits(uint32_t rowIndex, uint32_t startCol, uint32_t count, bool value); //установка в 0 / 1 k компонент j - ой строки, начиная с i - ой компоненты
 
+    BooleanMatrix& operator=(const BooleanMatrix& other); //присваивание(= )
+
+    //построчное побитовое умножение(&, &=)
+    BooleanMatrix operator&(const BooleanMatrix& other) const;
+    BooleanMatrix& operator&=(const BooleanMatrix& other);
+
+    //построчное побитовое сложение(| , |=)
+    BooleanMatrix operator|(const BooleanMatrix& other) const;
+    BooleanMatrix& operator|=(const BooleanMatrix& other);
+
+    //построчное побитовое исключающее ИЛИ(^, ^=)
+    BooleanMatrix operator^(const BooleanMatrix& other) const;
+    BooleanMatrix& operator^=(const BooleanMatrix& other);
+        
+    //построчная побитовая инверсия (~)
+    BooleanMatrix operator~() const;
+
 
 private:
 

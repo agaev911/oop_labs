@@ -19,7 +19,8 @@ public:
     LinkedList(const LinkedList<ItemType>&);
     ~LinkedList();
 
-    LinkedList<ItemType>& operator=(const LinkedList<ItemType>&);
+    LinkedList<ItemType>& operator=(const LinkedList<ItemType>&); //присваивание(= )
+
     
     //получение итераторов на начало / конец списка(методы должны называться begin и end
     iterator begin();
@@ -92,6 +93,7 @@ LinkedList<ItemType>::~LinkedList()
     // Самостоятельно
 }
 
+//присваивание(= )
 template<typename ItemType>
 LinkedList<ItemType>& LinkedList<ItemType>::operator=(const LinkedList<ItemType>& other)
 {

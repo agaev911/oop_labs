@@ -33,9 +33,9 @@ public:
         return r;
     }
 
-    LinkedList<ItemType>& operator=(const LinkedList<ItemType>&);
-    
+    LinkedList<ItemType>& operator=(const LinkedList<ItemType>&); //присваивание(= )
 
+    
     //получение итераторов на начало/конец списка
     iterator begin(); //итератор на начало
     iterator end(); //итератор на конец
@@ -48,11 +48,16 @@ public:
     //добавление элемента
     void addToHead(const ItemType&); //в голову
     void addToTail(const ItemType&); //в хвост
+    bool insertAt(uint32_t index, const ItemType& value); //на позицию
+    bool addAfter(const ItemType& key, const ItemType& value); //после ключа
 
     //удаление элемента
     bool delFromHead(); //из головы
-
+    bool delFromTail(); // c хвоста
+    bool delAt(uint32_t index); //с позиции
+    bool delBefore(const ItemType& key); //по ключу
     
+
     bool isEmpty() const; //возвращает true, если список пуст
 
     void Clear(); //очистка списка
@@ -134,9 +139,22 @@ uint32_t LinkedList<ItemType>::getSize() const
     return size_;
 }
 
+//присваивание(= )
 template<typename ItemType>
-LinkedList<ItemType>& LinkedList<ItemType>::operator=(const LinkedList<ItemType>& other)
+LinkedList<ItemType>& LinkedList<ItemType>::operator=(const LinkedList<ItemType>& other) 
 {
+    if (this != &other)
+    {
+        Clear();
+
+        ListNode* temp = other.headPtr_;
+        while (temp != nullptr)
+        {
+            addToTail(temp->getValue());
+            temp = temp->getLinkToNextNode();
+        }
+    }
+
     return *this;
 }
 
@@ -193,6 +211,7 @@ void LinkedList<ItemType>::addToHead(const ItemType& value) //в голову
 
     ++size_;
 }
+
 template<typename ItemType>
 void LinkedList<ItemType>::addToTail(const ItemType& value) //в хвост
 {
@@ -212,6 +231,66 @@ void LinkedList<ItemType>::addToTail(const ItemType& value) //в хвост
     ++size_;
 }
 
+template<typename ItemType>
+bool LinkedList<ItemType>::insertAt(uint32_t index, const ItemType& value) //на позицию
+{
+    if (index > size_) return false;
+
+    if (index == 0)
+    {
+        addToHead(value);  
+        return true;
+    }
+    if (index == size_)
+    {
+        addToTail(value);   
+        return true;
+    }
+
+    ListNode* temp = headPtr_;
+    for (uint32_t i = 0; i < index; ++i)
+    {
+        temp = temp->getLinkToNextNode();
+    }
+
+    ListNode* newNode = new ListNode(value, temp, temp->getLinkToPrevNode());
+
+    temp->getLinkToPrevNode()->setLinkToNextNode(newNode);
+    temp->setLinkToPrevNode(newNode);
+
+    ++size_;
+
+    return true;
+}
+
+template<typename ItemType>
+bool LinkedList<ItemType>::addAfter(const ItemType& key, const ItemType& value) //после ключа
+{
+    ListNode* temp = headPtr_;
+    while (temp != nullptr && temp->getValue() != key)
+    {
+        temp = temp->getLinkToNextNode();
+    }
+
+    if (temp == nullptr) return false;
+
+    ListNode* newNode = new ListNode(value, temp->getLinkToNextNode(), temp);
+
+    if (temp->getLinkToNextNode())
+    {
+        temp->getLinkToNextNode()->setLinkToPrevNode(newNode);
+    }
+    else
+    {
+        tailPtr_ = newNode;
+    }
+
+    temp->setLinkToNextNode(newNode);
+
+    ++size_;
+    return true;
+}
+
 
 //удаление элемента
 template<typename ItemType>
@@ -224,6 +303,93 @@ bool LinkedList<ItemType>::delFromHead() //из головы
 
     if (headPtr_) headPtr_->setLinkToPrevNode(nullptr);
     else tailPtr_ = nullptr;
+
+    delete temp;
+    --size_;
+    return true;
+}
+
+template<typename ItemType>
+bool LinkedList<ItemType>::delFromTail() //с хвоста
+{
+    if (isEmpty()) return false;
+
+    ListNode* temp = tailPtr_;
+
+    tailPtr_ = tailPtr_->getLinkToPrevNode();
+
+    if (tailPtr_)
+    {
+        tailPtr_->setLinkToNextNode(nullptr);
+    }
+    else
+    {
+        headPtr_ = nullptr;
+    }
+
+    delete temp;
+
+    --size_;
+    return true;
+}
+
+template<typename ItemType>
+bool LinkedList<ItemType>::delAt(uint32_t index) //с позиции
+{
+    if (index >= size_) return false;
+
+    if (index == 0)
+    {
+        return delFromHead();
+    }
+    if (index == size_ - 1)
+    {
+        return delFromTail();
+    }
+
+    ListNode* temp = headPtr_;
+    for (uint32_t i = 0; i < index; ++i)
+    {
+        temp = temp->getLinkToNextNode();
+    }
+
+    ListNode* prevNode = temp->getLinkToPrevNode();
+    ListNode* nextNode = temp->getLinkToNextNode();
+
+    prevNode->setLinkToNextNode(nextNode);
+    nextNode->setLinkToPrevNode(prevNode);
+
+    delete temp;
+
+    --size_;
+    return true;
+}
+
+template<typename ItemType>
+bool LinkedList<ItemType>::delBefore(const ItemType& key) //по ключу
+{
+    ListNode* temp = headPtr_;
+    while (temp != nullptr && temp->getValue() != key)
+    {
+        temp = temp->getLinkToNextNode();
+    }
+
+    if (temp == nullptr) return false;
+
+    if (temp == headPtr_)
+    {
+        return delFromHead();  
+    }
+    if (temp == tailPtr_)
+    {
+        return delFromTail(); 
+    }
+
+    ListNode* prevNode = temp->getLinkToPrevNode();
+    ListNode* nextNode = temp->getLinkToNextNode();
+
+    prevNode->setLinkToNextNode(nextNode);
+    nextNode->setLinkToPrevNode(prevNode);
 
     delete temp;
     --size_;

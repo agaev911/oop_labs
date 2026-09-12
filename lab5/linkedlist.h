@@ -14,8 +14,10 @@ public:
     class iterator;
 
     LinkedList() = default; //по умолчанию
-    LinkedList(const LinkedList<ItemType>&);
+    LinkedList(const LinkedList<ItemType>&); //конструктор копирования
     ~LinkedList(); //деструктор
+
+    uint32_t getSize() const; //получение размера списка
 
 
     LinkedList<ItemType>& operator=(const LinkedList<ItemType>&);
@@ -90,11 +92,18 @@ private:
 };
 
 
-
+//конструктор копирования
 template<typename ItemType>
 LinkedList<ItemType>::LinkedList(const LinkedList<ItemType>& other)
 {
-    // Самостоятельно
+    ListNode* temp = other.headPtr_;
+
+    while (temp != nullptr)
+    {
+        addToTail(temp->getValue());
+
+        temp = temp->getLinkToNextNode();
+    }
 }
 
 //деструктор
@@ -104,29 +113,38 @@ LinkedList<ItemType>::~LinkedList()
     Clear();
 }
 
+//получение размера списка
+template<typename ItemType>
+uint32_t LinkedList<ItemType>::getSize() const
+{
+    return size_;
+}
+
 template<typename ItemType>
 LinkedList<ItemType>& LinkedList<ItemType>::operator=(const LinkedList<ItemType>& other)
 {
     return *this;
 }
 
+
 //получение итераторов на начало/конец списка
 template<typename ItemType>
-LinkedList<ItemType>::iterator LinkedList<ItemType>::begin() //итератор на начало
+typename LinkedList<ItemType>::iterator LinkedList<ItemType>::begin() //итератор на начало
 {
     return LinkedList<ItemType>::iterator(headPtr_);
 }
 
 template<typename ItemType>
-LinkedList<ItemType>::iterator LinkedList<ItemType>::end() //итератор на конец
+typename LinkedList<ItemType>::iterator LinkedList<ItemType>::end() //итератор на конец
 {
     return LinkedList<ItemType>::iterator(nullptr);
 }
 
+
 //поиск элемента по ключу
 template<typename ItemType>
 template<typename Predicate>
-LinkedList<ItemType>::iterator LinkedList<ItemType>::findIf(Predicate&& predicateObject)
+typename LinkedList<ItemType>::iterator LinkedList<ItemType>::findIf(Predicate&& predicateObject)
 {
     LinkedList<ItemType>::iterator it = begin();
 
@@ -139,6 +157,8 @@ LinkedList<ItemType>::iterator LinkedList<ItemType>::findIf(Predicate&& predicat
 
     return LinkedList<ItemType>::iterator(nullptr);
 }
+
+
 //добавление элемента
 template<typename ItemType>
 void LinkedList<ItemType>::addToHead(const ItemType& value) //в голову
@@ -159,7 +179,6 @@ void LinkedList<ItemType>::addToHead(const ItemType& value) //в голову
 
     ++size_;
 }
-
 
 
 //удаление элемента
@@ -195,6 +214,9 @@ void LinkedList<ItemType>::Clear() //очистка списка
     }
 }
 
+
+
+
 template<typename ItemType>
 LinkedList<ItemType>::ListNode::ListNode(ItemType value, ListNode* linkToNextNode, ListNode* linkToPrevNode) :
     value_(value), linkToNextNode_(linkToNextNode), linkToPrevNode_(linkToPrevNode) {
@@ -207,10 +229,10 @@ template<typename ItemType>
 const ItemType& LinkedList<ItemType>::ListNode::getValue() const { return value_; }
 
 template<typename ItemType>
-LinkedList<ItemType>::ListNode* LinkedList<ItemType>::ListNode::getLinkToNextNode() { return linkToNextNode_; }
+typename LinkedList<ItemType>::ListNode* LinkedList<ItemType>::ListNode::getLinkToNextNode() { return linkToNextNode_; }
 
 template<typename ItemType>
-LinkedList<ItemType>::ListNode* LinkedList<ItemType>::ListNode::getLinkToPrevNode() { return linkToPrevNode_; }
+typename LinkedList<ItemType>::ListNode* LinkedList<ItemType>::ListNode::getLinkToPrevNode() { return linkToPrevNode_; }
 
 template<typename ItemType>
 void LinkedList<ItemType>::ListNode::setLinkToNextNode(ListNode* newLink) { linkToNextNode_ = newLink; }
@@ -234,14 +256,14 @@ bool LinkedList<ItemType>::iterator::operator!=(const iterator& other)
 }
 
 template<typename ItemType>
-LinkedList<ItemType>::iterator& LinkedList<ItemType>::iterator::operator++()
+typename LinkedList<ItemType>::iterator& LinkedList<ItemType>::iterator::operator++()
 {
     nodePtr_ = nodePtr_->getLinkToNextNode();
     return *this;
 }
 
 template<typename ItemType>
-LinkedList<ItemType>::iterator LinkedList<ItemType>::iterator::operator++(int)
+typename LinkedList<ItemType>::iterator LinkedList<ItemType>::iterator::operator++(int)
 {
     LinkedList<ItemType>::iterator oldIterator(*this);
     nodePtr_ = nodePtr_->getLinkToNextNode();

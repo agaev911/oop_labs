@@ -62,8 +62,6 @@ DynamicArray::DynamicArray(const int array[], int size) //конструктор из обычног
 
 DynamicArray::DynamicArray(DynamicArray&& otherArray) //конструктор перемещения
 {
-    std::cout << "DynamicArray::DynamicArray(DynamicArray&&)" << std::endl;
-
     arrayData_ = otherArray.arrayData_;
     arrayLength_ = otherArray.arrayLength_;
 
@@ -73,8 +71,6 @@ DynamicArray::DynamicArray(DynamicArray&& otherArray) //конструктор перемещения
 
 DynamicArray& DynamicArray::operator=(DynamicArray&& otherArray) //присваивание перемещением(= (DynamicArray && other))
 {
-    std::cout << "DynamicArray::operator=(DynamicArray&&)" << std::endl;
-
     if (this != &otherArray)
     {
         delete[] arrayData_;
@@ -287,7 +283,7 @@ DynamicArray& DynamicArray::operator=(const DynamicArray& otherArray) //присваив
     // Проверка на самоприсваивание: если это один и тот же объект, ничего не делаем.
     if (this != &otherArray)
     {
-        // 1. Освобождаем старую память, так как мы будем создавать новую копию.
+        // 1. Освобождаем старую память
         delete[] arrayData_;
 
         // 2. Если другой массив пуст, текущий тоже становится пустым.

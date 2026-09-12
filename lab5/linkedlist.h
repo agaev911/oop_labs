@@ -20,6 +20,8 @@ public:
     ~LinkedList(); //деструктор
 
     uint32_t getSize() const; //получение размера списка
+    void swap(LinkedList<ItemType>& other); //обмен содержимого с другим списком (swap)
+
 
     //ввод/вывод в консоль (потоковый)
     friend ostream& operator<<(ostream& r, const LinkedList<ItemType>& list) //вывод
@@ -40,6 +42,9 @@ public:
     iterator begin(); //итератор на начало
     iterator end(); //итератор на конец
 
+    //поиск максимального / минимального элемента
+    ItemType getMax() const; //max
+    ItemType getMin() const; //min
 
     template<typename Predicate>
     iterator findIf(Predicate&& PredicateObject); //поиск элемента по ключу
@@ -139,6 +144,23 @@ uint32_t LinkedList<ItemType>::getSize() const
     return size_;
 }
 
+//обмен содержимого с другим списком(swap)
+template<typename ItemType>
+void LinkedList<ItemType>::swap(LinkedList<ItemType>& other)
+{
+    ListNode* tempHead = headPtr_;
+    headPtr_ = other.headPtr_;
+    other.headPtr_ = tempHead;
+
+    ListNode* tempTail = tailPtr_;
+    tailPtr_ = other.tailPtr_;
+    other.tailPtr_ = tempTail;
+
+    uint32_t tempSize = size_;
+    size_ = other.size_;
+    other.size_ = tempSize;
+}
+
 //присваивание(= )
 template<typename ItemType>
 LinkedList<ItemType>& LinkedList<ItemType>::operator=(const LinkedList<ItemType>& other) 
@@ -172,6 +194,28 @@ typename LinkedList<ItemType>::iterator LinkedList<ItemType>::end() //итератор н
     return LinkedList<ItemType>::iterator(nullptr);
 }
 
+template<typename ItemType>
+ItemType LinkedList<ItemType>::getMax() const
+{
+    // 1. Проверка на пустоту
+    assert(!isEmpty() && "List is empty");
+
+    // 2. Начинаем с головы
+    ItemType maxValue = headPtr_->getValue();
+
+    // 3. Проходим по всем узлам
+    ListNode* current = headPtr_->getLinkToNextNode();
+    while (current != nullptr)
+    {
+        if (current->getValue() > maxValue)
+        {
+            maxValue = current->getValue();
+        }
+        current = current->getLinkToNextNode();
+    }
+
+    return maxValue;
+}
 
 //поиск элемента по ключу
 template<typename ItemType>

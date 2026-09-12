@@ -1,6 +1,8 @@
 #pragma once
 
 #include <stdint.h>
+#include <iostream>
+using namespace std;
 
 template<typename ItemType>
 class LinkedList
@@ -19,6 +21,17 @@ public:
 
     uint32_t getSize() const; //получение размера списка
 
+    //ввод/вывод в консоль (потоковый)
+    friend ostream& operator<<(ostream& r, const LinkedList<ItemType>& list) //вывод
+    {
+        LinkedList<ItemType>::ListNode* temp = list.headPtr_;
+        while (temp != nullptr)
+        {
+            r << temp->getValue() << " ";
+            temp = temp->getLinkToNextNode();
+        }
+        return r;
+    }
 
     LinkedList<ItemType>& operator=(const LinkedList<ItemType>&);
     
@@ -34,6 +47,7 @@ public:
 
     //добавление элемента
     void addToHead(const ItemType&); //в голову
+    void addToTail(const ItemType&); //в хвост
 
     //удаление элемента
     bool delFromHead(); //из головы
@@ -176,6 +190,24 @@ void LinkedList<ItemType>::addToHead(const ItemType& value) //в голову
     {
         tailPtr_ = newNode;
     }
+
+    ++size_;
+}
+template<typename ItemType>
+void LinkedList<ItemType>::addToTail(const ItemType& value) //в хвост
+{
+    ListNode* newNode = new ListNode(value, nullptr, tailPtr_);
+
+    if (tailPtr_)
+    {
+        tailPtr_->setLinkToNextNode(newNode);
+    }
+    else
+    {
+        headPtr_ = newNode;
+    }
+
+    tailPtr_ = newNode;
 
     ++size_;
 }

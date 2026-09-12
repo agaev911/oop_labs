@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma once
-
 #include <stdint.h>
 
 template<typename ItemType>
@@ -15,23 +13,33 @@ public:
 
     class iterator;
 
-    LinkedList() = default; //конструктор по умолчанию
+    LinkedList() = default; //по умолчанию
     LinkedList(const LinkedList<ItemType>&);
-    ~LinkedList();
+    ~LinkedList(); //деструктор
 
-    LinkedList<ItemType>& operator=(const LinkedList<ItemType>&); //присваивание(= )
 
+    LinkedList<ItemType>& operator=(const LinkedList<ItemType>&);
     
-    //получение итераторов на начало / конец списка(методы должны называться begin и end
-    iterator begin();
-    iterator end();
+
+    //получение итераторов на начало/конец списка
+    iterator begin(); //итератор на начало
+    iterator end(); //итератор на конец
+
+
+    template<typename Predicate>
+    iterator findIf(Predicate&& PredicateObject); //поиск элемента по ключу
+
 
     //добавление элемента
     void addToHead(const ItemType&); //в голову
 
+    //удаление элемента
+    bool delFromHead(); //из головы
+
     
-    template<typename Predicate>
-    iterator findIf(Predicate&& PredicateObject); //поиск элемента по ключу
+    bool isEmpty() const; //возвращает true, если список пуст
+
+    void Clear(); //очистка списка
 
 private:
 
@@ -81,40 +89,59 @@ private:
     ListNode* nodePtr_;
 };
 
+
+
 template<typename ItemType>
 LinkedList<ItemType>::LinkedList(const LinkedList<ItemType>& other)
 {
     // Самостоятельно
 }
 
+//деструктор
 template<typename ItemType>
 LinkedList<ItemType>::~LinkedList()
 {
-    // Самостоятельно
+    Clear();
 }
 
-//присваивание(= )
 template<typename ItemType>
 LinkedList<ItemType>& LinkedList<ItemType>::operator=(const LinkedList<ItemType>& other)
 {
     return *this;
 }
 
+//получение итераторов на начало/конец списка
 template<typename ItemType>
-LinkedList<ItemType>::iterator LinkedList<ItemType>::begin()
+LinkedList<ItemType>::iterator LinkedList<ItemType>::begin() //итератор на начало
 {
     return LinkedList<ItemType>::iterator(headPtr_);
 }
 
 template<typename ItemType>
-LinkedList<ItemType>::iterator LinkedList<ItemType>::end()
+LinkedList<ItemType>::iterator LinkedList<ItemType>::end() //итератор на конец
 {
     return LinkedList<ItemType>::iterator(nullptr);
 }
 
-//получение итераторов на начало / конец списка(методы должны называться begin и end)
+//поиск элемента по ключу
 template<typename ItemType>
-void LinkedList<ItemType>::addToHead(const ItemType& value)
+template<typename Predicate>
+LinkedList<ItemType>::iterator LinkedList<ItemType>::findIf(Predicate&& predicateObject)
+{
+    LinkedList<ItemType>::iterator it = begin();
+
+    while (it != end())
+    {
+        if (predicateObject(*it)) return it;
+
+        ++it;
+    }
+
+    return LinkedList<ItemType>::iterator(nullptr);
+}
+//добавление элемента
+template<typename ItemType>
+void LinkedList<ItemType>::addToHead(const ItemType& value) //в голову
 {
     LinkedList<ItemType>::ListNode* newNode = new LinkedList<ItemType>::ListNode(value, headPtr_);
 
@@ -133,21 +160,39 @@ void LinkedList<ItemType>::addToHead(const ItemType& value)
     ++size_;
 }
 
+
+
+//удаление элемента
 template<typename ItemType>
-template<typename Predicate>
-//поиск элемента по ключу
-LinkedList<ItemType>::iterator LinkedList<ItemType>::findIf(Predicate&& predicateObject)
+bool LinkedList<ItemType>::delFromHead() //из головы
 {
-    LinkedList<ItemType>::iterator it = begin();
+    if (isEmpty()) return false;
 
-    while (it != end())
+    ListNode* temp = headPtr_;
+    headPtr_ = headPtr_->getLinkToNextNode();
+
+    if (headPtr_) headPtr_->setLinkToPrevNode(nullptr);
+    else tailPtr_ = nullptr;
+
+    delete temp;
+    --size_;
+    return true;
+}
+
+
+template<typename ItemType>
+bool LinkedList<ItemType>::isEmpty() const //возвращает true, если список пуст
+{
+    return size_ == 0;
+}
+
+template<typename ItemType>
+void LinkedList<ItemType>::Clear() //очистка списка
+{
+    while (!isEmpty())  
     {
-        if (predicateObject(*it)) return it;
-
-        ++it;
+        delFromHead(); 
     }
-
-    return LinkedList<ItemType>::iterator(nullptr);
 }
 
 template<typename ItemType>

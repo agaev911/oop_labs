@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <assert.h>
 #include <iostream>
 using namespace std;
 
@@ -16,10 +17,14 @@ public:
     class iterator;
 
     LinkedList() = default; //по умолчанию
+    LinkedList(const ItemType[], uint32_t); //конструктор из обычного массива
     LinkedList(const LinkedList<ItemType>&); //конструктор копирования
     ~LinkedList(); //деструктор
 
     uint32_t getSize() const; //получение размера списка
+
+    void swap(LinkedList<ItemType>& other); //обмен содержимого с другим списком(swap)
+
 
     //ввод/вывод в консоль (потоковый)
     friend ostream& operator<<(ostream& r, const LinkedList<ItemType>& list) //вывод
@@ -32,10 +37,34 @@ public:
         }
         return r;
     }
+    friend istream& operator>>(istream& r, LinkedList<ItemType>& list) //ввод
+    {
+        uint32_t size;
+        cout << "Введите количество элементов: ";
+        r >> size;
+
+        list.Clear();
+
+        for (uint32_t i = 0; i < size; ++i)
+        {
+            ItemType value;
+            cout << "Элемент " << i + 1 << ": ";
+            r >> value;
+            list.addToTail(value);
+        }
+        return r;
+    }
 
     LinkedList<ItemType>& operator=(const LinkedList<ItemType>&); //присваивание(= )
 
+    //получение ссылки на ключ элемента([])
+    ItemType& operator[](uint32_t index);           
+    const ItemType& operator[](uint32_t index) const;
     
+    //сравнение(== , != )
+    bool operator==(const LinkedList<ItemType>& other) const; //==
+    bool operator!=(const LinkedList<ItemType>& other) const; //!=
+
     //получение итераторов на начало/конец списка
     iterator begin(); //итератор на начало
     iterator end(); //итератор на конец
@@ -55,8 +84,11 @@ public:
     bool delFromHead(); //из головы
     bool delFromTail(); // c хвоста
     bool delAt(uint32_t index); //с позиции
-    bool delBefore(const ItemType& key); //по ключу
+    bool delKey(const ItemType& key); //по ключу
     
+    //поиск максимального / минимального элемента
+    ItemType getMax() const; //max
+    ItemType getMin() const; //min
 
     bool isEmpty() const; //возвращает true, если список пуст
 
@@ -110,6 +142,15 @@ private:
     ListNode* nodePtr_;
 };
 
+//конструктор из обычного массива
+template<typename ItemType>
+LinkedList<ItemType>::LinkedList(const ItemType array[], uint32_t size)
+{
+    for (uint32_t i = 0; i < size; ++i)
+    {
+        addToTail(array[i]);
+    }
+}
 
 //конструктор копирования
 template<typename ItemType>
@@ -139,6 +180,22 @@ uint32_t LinkedList<ItemType>::getSize() const
     return size_;
 }
 
+template<typename ItemType>
+void LinkedList<ItemType>::swap(LinkedList<ItemType>& other) //обмен содержимого с другим списком(swap)
+{
+    ListNode* tempHead = headPtr_;
+    headPtr_ = other.headPtr_;
+    other.headPtr_ = tempHead;
+
+    ListNode* tempTail = tailPtr_;
+    tailPtr_ = other.tailPtr_;
+    other.tailPtr_ = tempTail;
+
+    uint32_t tempSize = size_;
+    size_ = other.size_;
+    other.size_ = tempSize;
+}
+
 //присваивание(= )
 template<typename ItemType>
 LinkedList<ItemType>& LinkedList<ItemType>::operator=(const LinkedList<ItemType>& other) 
@@ -157,7 +214,71 @@ LinkedList<ItemType>& LinkedList<ItemType>::operator=(const LinkedList<ItemType>
 
     return *this;
 }
+// получение ссылки на ключ элемента([])
+template<typename ItemType>
+ItemType& LinkedList<ItemType>::operator[](uint32_t index)
+{
+    assert(index < size_ && "Index out of range");
 
+    ListNode* temp = headPtr_;
+    for (uint32_t i = 0; i < index; ++i)
+    {
+        temp = temp->getLinkToNextNode();
+    }
+
+    return temp->getValue();
+}
+template<typename ItemType>
+const ItemType& LinkedList<ItemType>::operator[](uint32_t index) const
+{
+    assert(index < size_ && "Index out of range");
+
+    ListNode* temp = headPtr_;
+    for (uint32_t i = 0; i < index; ++i)
+    {
+        temp = temp->getLinkToNextNode();
+    }
+
+    return temp->getValue();
+}
+
+// сравнение(== , != )
+template<typename ItemType>
+bool LinkedList<ItemType>::operator==(const LinkedList<ItemType>& other) const //==
+{
+    if (size_ != other.size_) return false;
+
+    ListNode* temp1 = headPtr_;
+    ListNode* temp2 = other.headPtr_;
+
+    while (temp1 != nullptr)
+    {
+        if (temp1->getValue() != temp2->getValue()) return false;
+
+        temp1 = temp1->getLinkToNextNode();
+        temp2 = temp2->getLinkToNextNode();
+    }
+
+    return true;
+}
+template<typename ItemType>
+bool LinkedList<ItemType>::operator!=(const LinkedList<ItemType>& other) const //!=
+{
+    if (size_ != other.size_) return true;
+
+    ListNode* temp1 = headPtr_;
+    ListNode* temp2 = other.headPtr_;
+
+    while (temp1 != nullptr)
+    {
+        if (temp1->getValue() != temp2->getValue()) return true;
+
+        temp1 = temp1->getLinkToNextNode();
+        temp2 = temp2->getLinkToNextNode();
+    }
+
+    return false;
+}
 
 //получение итераторов на начало/конец списка
 template<typename ItemType>
@@ -165,7 +286,6 @@ typename LinkedList<ItemType>::iterator LinkedList<ItemType>::begin() //итератор
 {
     return LinkedList<ItemType>::iterator(headPtr_);
 }
-
 template<typename ItemType>
 typename LinkedList<ItemType>::iterator LinkedList<ItemType>::end() //итератор на конец
 {
@@ -366,7 +486,7 @@ bool LinkedList<ItemType>::delAt(uint32_t index) //с позиции
 }
 
 template<typename ItemType>
-bool LinkedList<ItemType>::delBefore(const ItemType& key) //по ключу
+bool LinkedList<ItemType>::delKey(const ItemType& key) //по ключу
 {
     ListNode* temp = headPtr_;
     while (temp != nullptr && temp->getValue() != key)
@@ -396,6 +516,46 @@ bool LinkedList<ItemType>::delBefore(const ItemType& key) //по ключу
     return true;
 }
 
+//поиск максимального / минимального элемента
+template<typename ItemType>
+ItemType LinkedList<ItemType>::getMax() const //max
+{
+     assert(!isEmpty() && "List is empty");
+
+    ItemType maxValue = headPtr_->getValue();
+
+    ListNode* temp = headPtr_->getLinkToNextNode();
+    while (temp != nullptr)
+    {
+        if (temp->getValue() > maxValue)
+        {
+            maxValue = temp->getValue();
+        }
+        temp = temp->getLinkToNextNode();
+    }
+
+    return maxValue;
+}
+
+template<typename ItemType>
+ItemType LinkedList<ItemType>::getMin() const //min
+{
+    assert(!isEmpty() && "List is empty");
+
+    ItemType minValue = headPtr_->getValue();
+
+    ListNode* temp = headPtr_->getLinkToNextNode();
+    while (temp != nullptr)
+    {
+        if (temp->getValue() < minValue)
+        {
+            minValue = temp->getValue();
+        }
+        temp = temp->getLinkToNextNode();
+    }
+
+    return minValue;
+}
 
 template<typename ItemType>
 bool LinkedList<ItemType>::isEmpty() const //возвращает true, если список пуст

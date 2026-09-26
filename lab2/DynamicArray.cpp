@@ -9,17 +9,23 @@ void Swap(int& a, int& b) //дл€ сортировки
 }
 
 DynamicArray::DynamicArray() : arrayData_(nullptr), arrayLength_(0) {} //конструктор по умолчанию
-
-DynamicArray::DynamicArray(int initialLength) : arrayLength_(initialLength)
+DynamicArray::DynamicArray(const int array[], int size) //конструктор из обычного массива
 {
-    arrayData_ = new int[initialLength];
-
-    for (int i = 0; i < arrayLength_; i++)
+    arrayLength_ = size;
+    if (size == 0)
     {
-        arrayData_[i] = 0;
+        arrayData_ = nullptr;
+        arrayLength_ = 0;
+        return;
+    }
+
+    arrayData_ = new int[size];
+
+    for (int i = 0; i < size; ++i)
+    {
+        arrayData_[i] = array[i];
     }
 }
-
 DynamicArray::DynamicArray(const DynamicArray& otherArray) //конструктор копировани€
 {
     // ≈сли копируемый массив пуст, новый массив также будет пустым.
@@ -42,51 +48,14 @@ DynamicArray::DynamicArray(const DynamicArray& otherArray) //конструктор копиров
     }
 }
 
-DynamicArray::DynamicArray(const int array[], int size) //конструктор из обычного массива
+DynamicArray::DynamicArray(int initialLength) : arrayLength_(initialLength)
 {
-    arrayLength_ = size;
-    if (size == 0)
+    arrayData_ = new int[initialLength];
+
+    for (int i = 0; i < arrayLength_; i++)
     {
-        arrayData_ = nullptr;
-        arrayLength_ = 0;
-        return;
+        arrayData_[i] = 0;
     }
-
-    arrayData_ = new int[size];
-
-    for (int i = 0; i < size; ++i)
-    {
-        arrayData_[i] = array[i];
-    }
-}
-
-DynamicArray::DynamicArray(DynamicArray&& otherArray) //конструктор перемещени€
-{
-    std::cout << "DynamicArray::DynamicArray(DynamicArray&&)" << std::endl;
-
-    arrayData_ = otherArray.arrayData_;
-    arrayLength_ = otherArray.arrayLength_;
-
-    otherArray.arrayData_ = nullptr;
-    otherArray.arrayLength_ = 0;
-}
-
-DynamicArray& DynamicArray::operator=(DynamicArray&& otherArray) //присваивание перемещением(= (DynamicArray && other))
-{
-    std::cout << "DynamicArray::operator=(DynamicArray&&)" << std::endl;
-
-    if (this != &otherArray)
-    {
-        delete[] arrayData_;
-
-        arrayData_ = otherArray.arrayData_;
-        arrayLength_ = otherArray.arrayLength_;
-
-        otherArray.arrayData_ = nullptr;
-        otherArray.arrayLength_ = 0;
-    }
-
-    return *this;
 }
 
 DynamicArray::~DynamicArray() //деструктор
@@ -94,6 +63,62 @@ DynamicArray::~DynamicArray() //деструктор
     delete[] arrayData_;
 }
 
+bool DynamicArray::swapArrays(DynamicArray& b) //обмен содержимого с другим массивом(swap)
+{
+    if (this == &b) return true;
+
+    int* tempData = arrayData_;
+    int tempLength = arrayLength_;
+
+    arrayData_ = b.arrayData_;
+    arrayLength_ = b.arrayLength_;
+
+    b.arrayData_ = tempData;
+    b.arrayLength_ = tempLength;
+
+    return true;
+}
+
+int DynamicArray::searchEl(const int element) const //поиск элемента(возвращает индекс первого совпавшего элемента, либо - 1, если совпадений нет);
+{
+    for (int i = 0; i < arrayLength_; i++)
+    {
+        if (arrayData_[i] == element)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+ostream& operator <<(ostream& r, const DynamicArray& s) //потоковый вывод
+{
+       for (int curIdx = 0; curIdx < s.arrayLength(); ++curIdx)
+           r << s[curIdx] << " ";
+       return r;
+}
+
+istream& operator>>(istream& r, DynamicArray& a) //потоковый ввод
+{
+    int length;
+    cout << "\n¬ведите длину массива: "; cin >> length;
+
+    a = DynamicArray(length);
+
+    cout << "\n¬ведите элементы массива через Enter:\n";
+    for (int i = 0; i < a.arrayLength(); i++)
+        r >> a[i];
+
+    return r;
+}
+
+void DynamicArray::sortArray() //сортировка элементов(пузырЄк);
+{
+    int i, j, f;
+    for (i = 0, f = 1; i < arrayLength_ - 1 && f; i++)
+        for (j = 0, f = 0; j < arrayLength_ - i - 1; j++)
+            if (arrayData_[j] > arrayData_[j + 1]) { Swap(arrayData_[j], arrayData_[j + 1]); f = 1; }
+}
 
 bool DynamicArray::insertAt(const int index, const int value) //вставка элемента по индексу. ≈сли индекс некорректный, вернуть false
 {
@@ -201,56 +226,6 @@ bool DynamicArray::deleteEl(const int element) //удаление элемента по значению (
     return true;
 }
 
-int DynamicArray::searchEl(const int element) const //поиск элемента(возвращает индекс первого совпавшего элемента, либо - 1, если совпадений нет);
-{
-    for (int i = 0; i < arrayLength_; i++)
-    {
-        if (arrayData_[i] == element)
-        {
-            return i;
-        }
-    }
-    return -1;
-}
-
-bool DynamicArray::swapArrays(DynamicArray& b) //обмен содержимого с другим массивом(swap)
-{
-    if (this == &b) return true;
-
-    int* tempData = arrayData_;
-    int tempLength = arrayLength_;
-
-    arrayData_ = b.arrayData_;
-    arrayLength_ = b.arrayLength_;
-
-    b.arrayData_ = tempData;
-    b.arrayLength_ = tempLength;
-
-    return true;
-}
-
-void DynamicArray::sortArray() //сортировка элементов(пузырЄк);
-{
-    int i, j, f;
-    for (i = 0, f = 1; i < arrayLength_ - 1 && f; i++)
-        for (j = 0, f = 0; j < arrayLength_ - i - 1; j++)
-            if (arrayData_[j] > arrayData_[j + 1]) { Swap(arrayData_[j], arrayData_[j + 1]); f = 1; }
-}
-
-//поиск максимального/минимального элемента
-int DynamicArray::maxEl()const
-{
-    int max = arrayData_[0];
-    for (int i = 1; i < arrayLength_; i++) if (arrayData_[i] > max) max = arrayData_[i];
-    return max;
-}
-int DynamicArray::minEl()const
-{
-    int min = arrayData_[0];
-    for (int i = 1; i < arrayLength_; i++) if (arrayData_[i] < min) min = arrayData_[i];
-    return min;
-}
-
 bool DynamicArray::deleteAllEl(const int value) //удаление всех элементов с заданным значением
 {
     if (arrayLength_ == 0) return false;
@@ -280,6 +255,39 @@ bool DynamicArray::deleteAllEl(const int value) //удаление всех элементов с зада
     arrayLength_ = newLength;
 
     return true;
+}
+
+//поиск максимального/минимального элемента
+int DynamicArray::maxEl()const
+{
+    int max = arrayData_[0];
+    for (int i = 1; i < arrayLength_; i++) if (arrayData_[i] > max) max = arrayData_[i];
+    return max;
+}
+int DynamicArray::minEl()const
+{
+    int min = arrayData_[0];
+    for (int i = 1; i < arrayLength_; i++) if (arrayData_[i] < min) min = arrayData_[i];
+    return min;
+}
+
+//получение итераторов на начало/конец массива
+int* DynamicArray::begin() const
+{
+    return arrayData_;
+}
+int* DynamicArray::end() const
+{
+    return arrayData_ + arrayLength_;
+}
+
+DynamicArray::DynamicArray(DynamicArray&& otherArray) //конструктор перемещени€
+{
+    arrayData_ = otherArray.arrayData_;
+    arrayLength_ = otherArray.arrayLength_;
+
+    otherArray.arrayData_ = nullptr;
+    otherArray.arrayLength_ = 0;
 }
 
 DynamicArray& DynamicArray::operator=(const DynamicArray& otherArray) //присваивание копированием(=)
@@ -313,7 +321,6 @@ DynamicArray& DynamicArray::operator=(const DynamicArray& otherArray) //присваив
     return *this;
 }
 
-
 //добавление элемента в конец массива(+и += )
 DynamicArray DynamicArray::operator+(int value) const
 {
@@ -326,6 +333,7 @@ DynamicArray DynamicArray::operator+(int value) const
 
     return result;
 }
+
 DynamicArray& DynamicArray::operator+=(int value)
 {
     int* tempArrayData = new int[arrayLength_ + 1];
@@ -340,6 +348,22 @@ DynamicArray& DynamicArray::operator+=(int value)
 
     delete[] arrayData_;
     arrayData_ = tempArrayData;
+
+    return *this;
+}
+
+DynamicArray& DynamicArray::operator=(DynamicArray&& otherArray) //присваивание перемещением(= (DynamicArray && other))
+{
+    if (this != &otherArray)
+    {
+        delete[] arrayData_;
+
+        arrayData_ = otherArray.arrayData_;
+        arrayLength_ = otherArray.arrayLength_;
+
+        otherArray.arrayData_ = nullptr;
+        otherArray.arrayLength_ = 0;
+    }
 
     return *this;
 }
@@ -359,6 +383,7 @@ DynamicArray DynamicArray::operator+(const DynamicArray& other) const
 
     return a;
 }
+
 DynamicArray& DynamicArray::operator+=(const DynamicArray& other)
 {
     if (other.arrayLength_ == 0) return *this;
@@ -379,31 +404,3 @@ DynamicArray& DynamicArray::operator+=(const DynamicArray& other)
     return *this;
 }
 
-
-
-void DynamicArray::add(const int value)
-{
-    int* tempArrayData = new int[arrayLength_ + 1];
-
-    for (int index = 0; index < arrayLength_; ++index)
-    {
-        tempArrayData[index] = arrayData_[index];
-    }
-
-    tempArrayData[arrayLength_] = value;
-
-    ++arrayLength_;
-
-    delete[] arrayData_;
-    arrayData_ = tempArrayData;
-}
-
-//получение итераторов на начало/конец массива (методы должны называтьс€ begin и end. ћетод end должен возвращать итератор не на последний элемент, а за позицию после него);
-int* begin(const DynamicArray& array)
-{
-    return array.getData();
-}
-int* end(const DynamicArray& array)
-{
-    return array.getData() + array.getLength();
-}

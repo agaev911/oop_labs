@@ -27,7 +27,6 @@ public:
     int searchEl(const int) const; //поиск элемента(возвращает индекс первого совпавшего элемента, либо - 1, если совпадений нет)
     
     friend void Swap(int&, int&);
-  
     void sortArray(); //сортировка элементов (пузырёк)
 
     bool insertAt(const int, const int); //вставка элемента по индексу. Если индекс некорректный, вернуть false

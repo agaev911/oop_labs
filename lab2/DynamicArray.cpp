@@ -1,12 +1,5 @@
 #include "DynamicArray.h"
 
-void Swap(int& a, int& b) //для сортировки
-{
-    int c;
-    c = a;
-    a = b;
-    b = c;
-}
 
 DynamicArray::DynamicArray() : arrayData_(nullptr), arrayLength_(0) {} //конструктор по умолчанию
 DynamicArray::DynamicArray(const int array[], int size) //конструктор из обычного массива
@@ -48,7 +41,7 @@ DynamicArray::DynamicArray(const DynamicArray& otherArray) //конструктор копиров
     }
 }
 
-DynamicArray::DynamicArray(int initialLength) : arrayLength_(initialLength)
+DynamicArray::DynamicArray(int initialLength) : arrayLength_(initialLength) //конструктор по длине
 {
     arrayData_ = new int[initialLength];
 
@@ -110,6 +103,14 @@ istream& operator>>(istream& r, DynamicArray& a) //потоковый ввод
         r >> a[i];
 
     return r;
+}
+
+void Swap(int& a, int& b) //для сортировки
+{
+    int c;
+    c = a;
+    a = b;
+    b = c;
 }
 
 void DynamicArray::sortArray() //сортировка элементов(пузырёк);
@@ -333,7 +334,6 @@ DynamicArray DynamicArray::operator+(int value) const
 
     return result;
 }
-
 DynamicArray& DynamicArray::operator+=(int value)
 {
     int* tempArrayData = new int[arrayLength_ + 1];
@@ -383,7 +383,6 @@ DynamicArray DynamicArray::operator+(const DynamicArray& other) const
 
     return a;
 }
-
 DynamicArray& DynamicArray::operator+=(const DynamicArray& other)
 {
     if (other.arrayLength_ == 0) return *this;

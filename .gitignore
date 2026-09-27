@@ -367,3 +367,6 @@ FodyWeavers.xsd
 /lab1/lab1.vcxproj.filters
 /oop_labs
 /lab2/Source.cpp
+/lab2.2/dynamicarray.cpp
+/lab4/dynamicarray.cpp
+/lab4

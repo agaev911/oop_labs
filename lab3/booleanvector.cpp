@@ -61,13 +61,6 @@ BooleanVector::BooleanVector(const char* s)
     }
 }
 
-//деструктор
-BooleanVector::~BooleanVector()
-{
-    delete[] vectorData_;
-    vectorData_ = nullptr;
-}
-
 //конструктор копирования
 BooleanVector::BooleanVector(const BooleanVector& v)
     :numBits_(v.numBits_)
@@ -87,55 +80,11 @@ BooleanVector::BooleanVector(const BooleanVector& v)
     }
 }
 
-//перемещающий конструктор
-BooleanVector::BooleanVector(BooleanVector&& other)
-    : vectorData_(other.vectorData_), numBits_(other.numBits_)
+//деструктор
+BooleanVector::~BooleanVector()
 {
-    other.vectorData_ = nullptr;
-    other.numBits_ = 0;
-}
-
-//присваивание(= )
-BooleanVector& BooleanVector::operator=(const BooleanVector& other)
-{
-    if (this != &other)
-    {
-        delete[] vectorData_;  // Освобождаем старую память
-
-        numBits_ = other.numBits_;
-
-        if (numBits_ == 0) {
-            vectorData_ = nullptr;
-        }
-        else {
-            uint32_t numBytes = (numBits_ + 7) / 8;
-            vectorData_ = new uint8_t[numBytes];
-
-            for (uint32_t i = 0; i < numBytes; i++) {
-                vectorData_[i] = other.vectorData_[i];
-            }
-        }
-    }
-
-    return *this;
-}
-
-BooleanVector& BooleanVector::operator=(BooleanVector&& other)
-{
-    if (this != &other)
-    {
-        delete[] vectorData_;  // Освобождаем старую память
-
-        // Забираем данные у other
-        vectorData_ = other.vectorData_;
-        numBits_ = other.numBits_;
-
-        // Оставляем other в пустом состоянии
-        other.vectorData_ = nullptr;
-        other.numBits_ = 0;
-    }
-
-    return *this;
+    delete[] vectorData_;
+    vectorData_ = nullptr;
 }
 
 //обмен содержимого с другим вектором(swap)
@@ -230,6 +179,35 @@ bool BooleanVector::SetAllBits(bool value)
     }
 
     return true;
+}
+
+//вес вектора (количество единичных компонент)
+uint32_t BooleanVector::getWeight() const
+{
+    uint32_t weight = 0;
+
+    for (uint32_t bit = 0; bit < numBits_; bit++)
+    {
+        uint32_t byteIndex = bit / (8 * sizeof(uint8_t));
+        uint32_t bitIndex = bit % (8 * sizeof(uint8_t));
+
+        if (vectorData_[byteIndex] & (1 << bitIndex))
+            weight++;
+    }
+
+    return weight;
+}
+
+// позволяет установить значение конкретного бита с помощью присваивания, но более сложный и требует вспомогательного класса
+BooleanVector::BitReference BooleanVector::operator[](const uint32_t index) const
+{
+    if (index >= numBits_)
+        throw std::runtime_error("Index is out of bounds.");
+
+    uint32_t byteIndex = index / (8 * sizeof(uint8_t));
+    uint32_t bitIndex = index % (8 * sizeof(uint8_t));
+
+    return BooleanVector::BitReference(&vectorData_[byteIndex], bitIndex);
 }
 
 //побитовое умножение (&, &=)
@@ -430,68 +408,56 @@ BooleanVector BooleanVector::operator~() const
     return result;
 }
 
-
-#if 0
-// простой вариант, но не позволяет установить значение конкретного бита с помощью присваивания
-bool BooleanVector::operator[](const uint32_t index) const
+//присваивание(= )
+BooleanVector& BooleanVector::operator=(const BooleanVector& other)
 {
-    if (index >= numBits_)
-        throw std::runtime_error("Index is out of bounds.");
-
-    uint32_t byteIndex = index / (8 * sizeof(uint8_t));
-    uint32_t bitIndex = index % (8 * sizeof(uint8_t));
-
-    return vectorData_[byteIndex] & (1 << bitIndex);
-}
-#endif
-
-// позволяет установить значение конкретного бита с помощью присваивания, но более сложный и требует вспомогательного класса
-BooleanVector::BitReference BooleanVector::operator[](const uint32_t index) const
-{
-    if (index >= numBits_)
-        throw std::runtime_error("Index is out of bounds.");
-
-    uint32_t byteIndex = index / (8 * sizeof(uint8_t));
-    uint32_t bitIndex = index % (8 * sizeof(uint8_t));
-
-    return BooleanVector::BitReference(&vectorData_[byteIndex], bitIndex);
-}
-
-//вес вектора (количество единичных компонент)
-uint32_t BooleanVector::getWeight() const
-{
-    uint32_t weight = 0;
-
-    for (uint32_t bit = 0; bit < numBits_; bit++)
+    if (this != &other)
     {
-        uint32_t byteIndex = bit / (8 * sizeof(uint8_t));
-        uint32_t bitIndex = bit % (8 * sizeof(uint8_t));
+        delete[] vectorData_;  // Освобождаем старую память
 
-        if (vectorData_[byteIndex] & (1 << bitIndex))
-            weight++;
+        numBits_ = other.numBits_;
+
+        if (numBits_ == 0) {
+            vectorData_ = nullptr;
+        }
+        else {
+            uint32_t numBytes = (numBits_ + 7) / 8;
+            vectorData_ = new uint8_t[numBytes];
+
+            for (uint32_t i = 0; i < numBytes; i++) {
+                vectorData_[i] = other.vectorData_[i];
+            }
+        }
     }
 
-    return weight;
+    return *this;
 }
 
-bool BooleanVector::operator==(const BooleanVector& other) const
+//перемещающий конструктор
+BooleanVector::BooleanVector(BooleanVector&& other)
+    : vectorData_(other.vectorData_), numBits_(other.numBits_)
 {
-    if (numBits_ != other.numBits_) return false;
+    other.vectorData_ = nullptr;
+    other.numBits_ = 0;
+}
 
-    uint32_t numBytes = (numBits_ + (8 * sizeof(uint8_t) - 1)) / (8 * sizeof(uint8_t));
-
-    for (uint32_t byteIndex = 0; byteIndex < numBytes - ((numBits_ % 8 == 0) ? 0 : 1); byteIndex++)
+//присваивание(= )
+BooleanVector& BooleanVector::operator=(BooleanVector&& other)
+{
+    if (this != &other)
     {
-        if (vectorData_[byteIndex] != other.vectorData_[byteIndex]) return false;
+        delete[] vectorData_;  // Освобождаем старую память
+
+        // Забираем данные у other
+        vectorData_ = other.vectorData_;
+        numBits_ = other.numBits_;
+
+        // Оставляем other в пустом состоянии
+        other.vectorData_ = nullptr;
+        other.numBits_ = 0;
     }
 
-    // Подумайте над тем, как заменить этот цикл одним сравнением
-    for (uint32_t bitIndex = 0; bitIndex < numBits_ % 8; bitIndex++)
-    {
-        if ((vectorData_[numBytes - 1] & (1 << bitIndex)) != (other.vectorData_[numBytes - 1] & (1 << bitIndex))) return false;
-    }
-
-    return true;
+    return *this;
 }
 
 

@@ -17,42 +17,13 @@ public:
     BooleanVector() = default; //конструктор по умолчанию
     BooleanVector(const uint32_t, const bool); //конструктор с параметрами (размер и значение - одно и то же для всех разрядов)
     BooleanVector(const char*); //конструктор из массива const char *
+    BooleanVector(const BooleanVector&); //конструктор копирования
 
     ~BooleanVector();//деструктор
 
-    BooleanVector(const BooleanVector&); //конструктор копирования
-    BooleanVector(BooleanVector&&); //перемещающий конструктор
-
-    BooleanVector& operator=(const BooleanVector&); //присваивание(= )
-    BooleanVector& operator=(BooleanVector&&); //перемещающее присваивание
+    uint32_t getLength() const { return numBits_; } //длина (количество бит) вектора
 
     bool SwapBV(BooleanVector&); //обмен содержимого с другим вектором(swap)
-    bool InvertBV(); //инверсия всех компонент вектора
-    bool InvertInd(uint32_t); //инверсия i-ой компоненты
-    bool SetBit(uint32_t, bool); //инверсия i-ой компоненты
-    bool SetBits(uint32_t, uint32_t, bool); //установка в 0 / 1 k компонент, начиная с i - ой
-    bool SetAllBits(bool); //установка в 0 / 1 всех компонент вектора
-
-    //побитовое умножение (&, &=)
-    BooleanVector operator&(const BooleanVector& other) const;
-    BooleanVector& operator&=(const BooleanVector& other);
-
-    //побитовое сложение(| , |=)
-    BooleanVector operator|(const BooleanVector& other) const;
-    BooleanVector& operator|=(const BooleanVector& other);
-
-    //побитовое исключающее ИЛИ(^, ^=);
-    BooleanVector operator^(const BooleanVector& other) const;
-    BooleanVector& operator^=(const BooleanVector& other);
-
-    //побитовые сдвиги(<< , >> , <<=, >>=)
-    BooleanVector operator<<(uint32_t sdvig) const;
-    BooleanVector operator>>(uint32_t sdvig) const;
-    BooleanVector& operator<<=(uint32_t sdvig);
-    BooleanVector& operator>>=(uint32_t sdvig);
-
-    //побитовая инверсия(~)
-    BooleanVector operator~() const;
 
     //ввод / вывод в консоль(потоковый)
     friend ostream& operator <<(ostream& r, const BooleanVector& s) //потоковый вывод
@@ -103,18 +74,40 @@ public:
         return r;
     }
 
-    // простой вариант, но не позволяет установить значение конкретного бита с помощью присваивания
-#if 0
-    bool operator[](const uint32_t) const;
-#endif
-    // позволяет установить значение конкретного бита с помощью присваивания, но более сложный и требует вспомогательного класса
-    BitReference operator[](const uint32_t) const;
-
-    uint32_t getLength() const { return numBits_; } //длина (количество бит) вектора
+    bool InvertBV(); //инверсия всех компонент вектора
+    bool InvertInd(uint32_t); //инверсия i-ой компоненты
+    bool SetBit(uint32_t, bool); //установка в 0/1 i-ой компоненты
+    bool SetBits(uint32_t, uint32_t, bool); //установка в 0 / 1 k компонент, начиная с i - ой
+    bool SetAllBits(bool); //установка в 0 / 1 всех компонент вектора
 
     uint32_t getWeight() const; //вес вектора (количество единичных компонент)
 
-    bool operator==(const BooleanVector& other) const;
+    BitReference operator[](const uint32_t) const; //получение компоненты([], см.примечание ниже)
+
+    //побитовое умножение (&, &=)
+    BooleanVector operator&(const BooleanVector& other) const;
+    BooleanVector& operator&=(const BooleanVector& other);
+
+    //побитовое сложение(| , |=)
+    BooleanVector operator|(const BooleanVector& other) const;
+    BooleanVector& operator|=(const BooleanVector& other);
+
+    //побитовое исключающее ИЛИ(^, ^=)
+    BooleanVector operator^(const BooleanVector& other) const;
+    BooleanVector& operator^=(const BooleanVector& other);
+
+    //побитовые сдвиги(<< , >> , <<=, >>=)
+    BooleanVector operator<<(uint32_t sdvig) const;
+    BooleanVector operator>>(uint32_t sdvig) const;
+    BooleanVector& operator<<=(uint32_t sdvig);
+    BooleanVector& operator>>=(uint32_t sdvig);
+
+    BooleanVector operator~() const; //побитовая инверсия(~)
+  
+    BooleanVector& operator=(const BooleanVector&); //присваивание(= )
+
+    BooleanVector(BooleanVector&&); //перемещающий конструктор
+    BooleanVector& operator=(BooleanVector&&); //перемещающее присваивание
 
 private:
 

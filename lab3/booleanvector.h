@@ -40,6 +40,7 @@ public:
     }
     friend istream& operator>>(istream& r, BooleanVector& s) //потоковый ввод
     {
+
         cout << "Введите количество битов: ";
         r >> s.numBits_;
 
@@ -49,6 +50,8 @@ public:
             numBytes += 1;
         }
 
+        delete[] s.vectorData_;
+         
         s.vectorData_ = new uint8_t[numBytes]; //выделяем место
 
         // Обнуляем все байты

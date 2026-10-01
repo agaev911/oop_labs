@@ -68,32 +68,32 @@ public:
     DynamicArray operator+(const DynamicArray& other) const;
     DynamicArray& operator+=(const DynamicArray& other);
 
-    // ввод/вывод в консоль(потоковый)
-    friend ostream& operator<<(ostream& r, const DynamicArray<ItemType>& s)
-    {
-        for (int curIdx = 0; curIdx < s.arrayLength_; ++curIdx)
-            r << s[curIdx] << " ";
-        return r;
-    }
+    //// ввод/вывод в консоль(потоковый)
+    //friend ostream& operator<<(ostream& r, const DynamicArray<ItemType>& s)
+    //{
+    //    for (int curIdx = 0; curIdx < s.arrayLength_; ++curIdx)
+    //        r << s[curIdx] << " ";
+    //    return r;
+    //}
 
-    friend istream& operator>>(istream& r, DynamicArray<ItemType>& a)
-    {
-        int length;
-        cout << "\n¬ведите длину массива: ";
-        r >> length;
+    //friend istream& operator>>(istream& r, DynamicArray<ItemType>& a)
+    //{
+    //    int length;
+    //    cout << "\n¬ведите длину массива: ";
+    //    r >> length;
 
-        delete[] a.arrayData_;
+    //    delete[] a.arrayData_;
 
-        a.arrayLength_ = length;
-        a.arrayData_ = new ItemType[length];
+    //    a.arrayLength_ = length;
+    //    a.arrayData_ = new ItemType[length];
 
-        cout << "\n¬ведите элементы массива через Enter:\n";
-        for (int i = 0; i < a.arrayLength_; i++)
+    //    cout << "\n¬ведите элементы массива через Enter:\n";
+    //    for (int i = 0; i < a.arrayLength_; i++)
 
-            r >> a.arrayData_[i];
+    //        r >> a.arrayData_[i];
 
-        return r;
-    }
+    //    return r;
+    //}
 
 private:
 
@@ -186,6 +186,29 @@ int DynamicArray<ItemType>::searchEl(const ItemType& element) const
         }
     }
     return -1;
+}
+
+template<typename ItemType>
+ostream& operator <<(ostream& r, const DynamicArray<ItemType>& s) //потоковый вывод
+{
+    for (int curIdx = 0; curIdx < s.arrayLength(); ++curIdx)
+        r << s[curIdx] << " ";
+    return r;
+}
+
+template<typename ItemType>
+istream& operator>>(istream& r, DynamicArray<ItemType> & a) //потоковый ввод
+{
+    int length;
+    cout << "\n¬ведите длину массива: "; r >> length;
+
+    a = DynamicArray(length);
+
+    cout << "\n¬ведите элементы массива через Enter:\n";
+    for (int i = 0; i < a.arrayLength(); i++)
+        r >> a[i];
+
+    return r;
 }
 
 template<typename ItemType>
@@ -347,6 +370,7 @@ bool DynamicArray<ItemType>::deleteAllEl(const ItemType& value)
 template<typename ItemType>
 ItemType DynamicArray<ItemType>::maxEl() const
 {
+    assert(arrayLength_ > 0 && "Array is empty");
     ItemType max = arrayData_[0];
     for (int i = 1; i < arrayLength_; i++)
         if (arrayData_[i] > max)
@@ -356,6 +380,7 @@ ItemType DynamicArray<ItemType>::maxEl() const
 template<typename ItemType>
 ItemType DynamicArray<ItemType>::minEl() const
 {
+    assert(arrayLength_ > 0 && "Array is empty");
     ItemType min = arrayData_[0];
     for (int i = 1; i < arrayLength_; i++)
         if (arrayData_[i] < min)

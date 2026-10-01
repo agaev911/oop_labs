@@ -13,7 +13,7 @@ int main()
 
     cout << "a: " << a << endl;
     cout << "b: " << b << endl;
-
+    
     DynamicArray copy_b(b);
     cout << "copy_b: " << copy_b << endl;
     puts("");

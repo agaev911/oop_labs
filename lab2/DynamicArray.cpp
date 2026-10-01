@@ -94,7 +94,7 @@ ostream& operator <<(ostream& r, const DynamicArray& s) //потоковый вывод
 istream& operator>>(istream& r, DynamicArray& a) //потоковый ввод
 {
     int length;
-    cout << "\n¬ведите длину массива: "; cin >> length;
+    cout << "\n¬ведите длину массива: "; r >> length;
 
     a = DynamicArray(length);
 
@@ -261,12 +261,14 @@ bool DynamicArray::deleteAllEl(const int value) //удаление всех элементов с зада
 //поиск максимального/минимального элемента
 int DynamicArray::maxEl()const
 {
+    assert(arrayLength_ > 0 && "Array is empty");
     int max = arrayData_[0];
     for (int i = 1; i < arrayLength_; i++) if (arrayData_[i] > max) max = arrayData_[i];
     return max;
 }
 int DynamicArray::minEl()const
 {
+    assert(arrayLength_ > 0 && "Array is empty");
     int min = arrayData_[0];
     for (int i = 1; i < arrayLength_; i++) if (arrayData_[i] < min) min = arrayData_[i];
     return min;

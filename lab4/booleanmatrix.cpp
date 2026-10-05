@@ -1,7 +1,6 @@
 #include "booleanvector.h"
 #include "booleanmatrix.h"
 
-
 //с параметрами(количество строк / столбцов и значения разрядов)
 BooleanMatrix::BooleanMatrix(const uint32_t numRows, const uint32_t numColumns, const bool initialValue)
 {
@@ -11,37 +10,56 @@ BooleanMatrix::BooleanMatrix(const uint32_t numRows, const uint32_t numColumns, 
     }
 }
 
+//конструктор из матрицы char
+BooleanMatrix::BooleanMatrix(const char** charMatrix, uint32_t numRows, uint32_t numColumns)
+{
+    for (uint32_t rowIndex = 0; rowIndex < numRows; ++rowIndex)
+    {
+        // Создаём строку из numColumns битов, все = false
+        BooleanVector row(numColumns, false);
+
+        for (uint32_t colIndex = 0; colIndex < numColumns; ++colIndex)
+        {
+            if (charMatrix[rowIndex][colIndex] == '1')
+            {
+                row.SetBit(colIndex, true);
+            }
+            // Если '0' — оставляем false
+        }
+
+        // Добавляем строку в матрицу
+        matrixData_ += row;
+    }
+}
+
 //получение числа строк и столбцов матрицы
 uint32_t BooleanMatrix::numRows() const
 {
-    return matrixData_.getLength();
+    return matrixData_.arrayLength();
 }
 uint32_t BooleanMatrix::numColumns() const
 {
-    return matrixData_.getLength() > 0 ? matrixData_[0].getLength() : 0;
+    return matrixData_.arrayLength() > 0 ? matrixData_[0].getLength() : 0;
 }
 
-// получение строки([]);
-BooleanVector& BooleanMatrix::operator[](const uint32_t rowIndex)
+//обмен содержимого с другой матрицей(swap)
+void BooleanMatrix::swapMatrix(BooleanMatrix& other)
 {
-    return matrixData_[rowIndex];
+    matrixData_.swapArrays(other.matrixData_);
 }
-const BooleanVector& BooleanMatrix::operator[](const uint32_t rowIndex) const
-{
-    return matrixData_[rowIndex];
-}
+
 
 //ввод / вывод в консоль(потоковый)
-std::ostream& operator<<(std::ostream& outputStream, const BooleanMatrix& booleanMatrix) //вывод
+ostream& operator<<(ostream& r, const BooleanMatrix& booleanMatrix) //вывод
 {
     uint32_t numRows = booleanMatrix.numRows();
 
     for (uint32_t rowIndex = 0; rowIndex < numRows; ++rowIndex)
     {
-        outputStream << booleanMatrix[rowIndex] << std::endl;
+        r << booleanMatrix[rowIndex] << endl;
     }
 
-    return outputStream;
+    return r;
 }
 istream& operator>>(istream& r, BooleanMatrix& matrix) //ввод
 {
@@ -60,13 +78,6 @@ istream& operator>>(istream& r, BooleanMatrix& matrix) //ввод
     return r;
 }
 
-
-//обмен содержимого с другой матрицей(swap)
-void BooleanMatrix::swapMatrix(BooleanMatrix& other)
-{
-    matrixData_.swapArrays(other.matrixData_);
-}
-
 //вес матрицы(количество единичных компонент)
 uint32_t BooleanMatrix::getWeight() const
 {
@@ -76,13 +87,6 @@ uint32_t BooleanMatrix::getWeight() const
         weight += matrixData_[i].getWeight();
     }
     return weight;
-}
-
-//вес j - ой строки
-uint32_t BooleanMatrix::rowWeight(uint32_t rowIndex) const
-{
-    if (rowIndex >= numRows()) return 0;
-    return matrixData_[rowIndex].getWeight();
 }
 
 //конъюнкция всех строк(возвращает булев вектор)
@@ -108,6 +112,13 @@ BooleanVector BooleanMatrix::disjunctionRows() const
     }
 
     return result;
+}
+
+//вес j - ой строки
+uint32_t BooleanMatrix::rowWeight(uint32_t rowIndex) const
+{
+    if (rowIndex >= numRows()) return 0;
+    return matrixData_[rowIndex].getWeight();
 }
 
 //инверсия в i - ой компоненты j - ой строки
@@ -158,6 +169,16 @@ BooleanMatrix& BooleanMatrix::operator=(const BooleanMatrix& other)
         matrixData_ = other.matrixData_;
     }
     return *this;
+}
+
+// получение строки([]);
+BooleanVector& BooleanMatrix::operator[](const uint32_t rowIndex)
+{
+    return matrixData_[rowIndex];
+}
+const BooleanVector& BooleanMatrix::operator[](const uint32_t rowIndex) const
+{
+    return matrixData_[rowIndex];
 }
 
 //построчное побитовое умножение(&, &=)

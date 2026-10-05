@@ -1,122 +1,85 @@
 #include <iostream>
-#include <fstream>
-#include <limits>
 
 #include "booleanmatrix.h"
 
-template<typename T>
-using MatrixRow = DynamicArray<T>;
-
-template<typename T>
-using Matrix = DynamicArray<MatrixRow<T>>;
+#define rus setlocale(LC_ALL, "rus");
 
 int main()
 {
-#if 0
-    BooleanMatrix testMatrix1(10, 10, false);
+    rus;
 
-    for (uint32_t i = 0; i < 10; ++i)
-    {
-        testMatrix1[i][i] = true;
-    }
+    const char* ch[] = { "01110", "01110" ,"01010" ,"01110" ,"01110" };
+    
+    BooleanMatrix m, a(ch, 5, 5), b(3, 3, 0), c;
 
-    std::cout << testMatrix1;
-#endif
+    m = a; //присваивание
+    cout << "матрица m:" << endl << m;
 
-    std::fstream graphFile("graph.txt", std::ios::in);
+    cout << endl << "получение числа строк a: " << a.numRows() << endl;
+    cout << "получение числа столбцов a: " << a.numColumns() << endl;
 
-    uint32_t numVertices;
-    uint32_t numEdges;
+    puts("");
+    cout << endl << "матрица a: " << endl << a << endl;
+    cout << "матрица b: " << endl << b << endl;
 
-    graphFile >> numVertices;
-    graphFile >> numEdges;
+    cout << "обмен содержимого с другой матрицей(swap), a swap с b: " << endl;
+    
+    a.swapMatrix(b);
+    
+    cout << endl << "матрица a: " << endl << a << endl;
+    cout << "матрица b: " << endl << b << endl;
 
-    BooleanMatrix adjacencyMatrix(numVertices, numVertices, false);
-    Matrix<uint32_t> weightMatrix;
+    cout << endl << "вес матрицы m: " << endl << m.getWeight() << endl;
+    
+    cout << endl << "конъюнкция всех строк: " << m.conjunctionRows() << endl;
+    cout << endl << "дизъюнкция всех строк: " << m.disjunctionRows() << endl;
 
-    for (uint32_t i = 0; i < numVertices; ++i)
-    {
-        MatrixRow<uint32_t> matrixRow;
+    cout << endl << "вес 3-ой строки m: " << m.rowWeight(2) << endl;
+  
+    m.invertRowBit(2, 2);
+    cout << endl << "инверсия в 3-ой компоненты 3-ой строки: " << endl << m << endl;
 
-        for (uint32_t j = 0; j < numVertices; ++j)
-        {
-            matrixRow += 0;
-        }
+    m.invertRowBits(2,1,3);
+    cout << "инверсия 3 компонент 3-ой строки, начиная с 2-ой компоненты " << endl << m << endl;
 
-        weightMatrix += matrixRow;
-    }
+    m.setRowBit(0, 2, 0);
+    cout << "установка в 0 3-ой компоненты 1-ой строки " << endl << m << endl;
 
-    for (uint32_t i = 0; i < numEdges; ++i)
-    {
-        uint32_t startVertex, endVertex, edgeWeight;
+    m.setRowBits(4,1,3,0);
+    cout << "установка в 0 3 компонент 5-ой строки, начиная с 2-ой компоненты;  " << endl << m << endl;
 
-        graphFile >> startVertex >> endVertex >> edgeWeight;
+    cout << endl << "получение строки" << endl;
+    cout << "m[1]: " << m[1] << endl << "m[2]: " << m[2] << endl << "m[3]: " << m[3] << endl;
+    
+    c = ~m;
+    cout << endl << "построчная побитовая инверсия (~) ~m: " << endl << c << endl;
 
-#if 0
-        std::cout << startVertex << " " << endVertex << " " << edgeWeight << std::endl;
-#endif
+    cout << endl << "b: " << endl << b;
+    cout << endl << "m: " << endl << m << endl;
 
-        adjacencyMatrix[startVertex - 1][endVertex - 1] = true;
-        adjacencyMatrix[endVertex - 1][startVertex - 1] = true;
+    cout << "построчное побитовое умножение" << endl;
+    m = m & b;
+    cout << "m & b" << endl << m << endl;
 
-        weightMatrix[startVertex - 1][endVertex - 1] = edgeWeight;
-        weightMatrix[endVertex - 1][startVertex - 1] = edgeWeight;
-    }
+    cout << "построчное побитовое умножение" << endl;
+    m &= b;
+    cout << "m &= b" << endl << m << endl;
 
-    std::cout << adjacencyMatrix << std::endl;
+    cout << "построчное побитовое сложение" << endl;
+    m = m | b;
+    cout << "m & b" << endl << m << endl;
 
-    DynamicArray<uint32_t> shortestPathLength;
+    cout << "построчное побитовое сложение" << endl;
+    m |= b;
+    cout << "m &= b" << endl << m << endl;
 
-    shortestPathLength += 0;
+    cout << "построчное побитовое исключающее ИЛИ" << endl;
+    m = m ^ b;
+    cout << "m ^ b" << endl << m << endl;
 
-    for (uint32_t i = 1; i < numVertices; ++i)
-    {
-        shortestPathLength += std::numeric_limits<uint32_t>::max();
-    }
-
-    BooleanVector visitedVertices(numVertices, false);
-
-    while (true)
-    {
-        if (visitedVertices.getWeight() == numVertices) break;
-
-        uint32_t firstIndex = -1;
-        uint32_t length = -1;
-
-        for (uint32_t i = 0; i < numVertices; i++)
-        {
-            if (!visitedVertices[i])
-            {
-                firstIndex = i;
-                length = shortestPathLength[i];
-                break;
-            }
-        }
-
-        for (uint32_t i = firstIndex + 1; i < numVertices; i++)
-        {
-            if (!visitedVertices[i] && shortestPathLength[i] < length)
-            {
-                length = shortestPathLength[i];
-                firstIndex = i;
-            }
-        }
-
-        for (uint32_t i = 0; i < numVertices; ++i)
-        {
-            if (adjacencyMatrix[firstIndex][i] && !visitedVertices[i])
-            {
-                uint32_t currPathLength = shortestPathLength[i];
-                uint32_t probablyShorterPathLength = shortestPathLength[firstIndex] + weightMatrix[firstIndex][i];
-                if (probablyShorterPathLength < currPathLength)
-                {
-                    shortestPathLength[i] = probablyShorterPathLength;
-                }
-            }
-        }
-
-        visitedVertices[firstIndex] = true;
-    }
+    cout << "построчное побитовое исключающее ИЛИ" << endl;
+    m ^= b;
+    cout << "m ^= b" << endl << m << endl;
 
     return 0;
 }

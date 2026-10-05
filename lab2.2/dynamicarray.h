@@ -202,7 +202,7 @@ istream& operator>>(istream& r, DynamicArray<ItemType> & a) //потоковый ввод
     int length;
     cout << "\n¬ведите длину массива: "; r >> length;
 
-    a = DynamicArray(length);
+    a = DynamicArray<ItemType>(length);
 
     cout << "\n¬ведите элементы массива через Enter:\n";
     for (int i = 0; i < a.arrayLength(); i++)
@@ -522,4 +522,3 @@ DynamicArray<ItemType>& DynamicArray<ItemType>::operator+=(const DynamicArray& o
 
     return *this;
 }
-

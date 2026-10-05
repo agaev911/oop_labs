@@ -22,7 +22,7 @@ int main()
 
     cout << endl << "длина (количество бит) вектора c:" << c.getLength() << endl;
 
-    cout << endl << "обмен содержимого с другим вектором(swap): ";
+    cout << endl << "обмен содержимого с другим вектором(swap): b и c";
     cout << endl << "b:" << b << endl << "c:" << c << endl << "swap:";
     b.SwapBV(c);
     cout << endl << "b:" << b << endl << "c:" << c << endl;
@@ -31,19 +31,19 @@ int main()
     c.InvertBV();
     cout << c << endl;
 
-    cout << endl << "инверсия i(0)-ой компоненты: ";
+    cout << endl << "инверсия i(0)-ой компоненты вектора c: ";
     c.InvertInd(0);
     cout << c << endl;
 
-    cout << endl << "установка в 0/-1 i(2)-ой компоненты: ";
+    cout << endl << "установка в 0/-1 i(2)-ой компоненты вектора c: ";
     c.SetBit(2, 1);
     cout << c << endl;
 
-    cout << endl << "установка в 0 / -1 k(3) компонент, начиная с 4 - ой: ";
+    cout << endl << "установка в 0 / -1 k(3) компонент вектора c, начиная с 4 - ой: ";
     c.SetBits(4, 3, 1);
     cout << c << endl;
 
-    cout << endl << "установка в 0 / 1 всех компонент вектора: ";
+    cout << endl << "установка в 0 / 1 всех компонент вектора вектора c: ";
     c.SetAllBits(1);
     cout << c << endl;
 

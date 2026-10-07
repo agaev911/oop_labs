@@ -55,7 +55,37 @@ public:
         return r;
     }
 
-    LinkedList<ItemType>& operator=(const LinkedList<ItemType>&); //присваивание(= )
+    //получение итераторов на начало/конец списка
+    iterator begin(); //итератор на начало
+    iterator end(); //итератор на конец
+    
+    template<typename Predicate>
+    iterator findIf(Predicate&& PredicateObject); //поиск элемента по ключу
+
+    //добавление элемента
+    void addToHead(const ItemType&); //в голову
+    void addToTail(const ItemType&); //в хвост
+    bool insertAt(uint32_t index, const ItemType& value); //на позицию
+    bool addAfter(const ItemType& key, const ItemType& value); //после ключа
+    void addByIterator(iterator it, const ItemType& value); //по итератору
+
+    //удаление элемента
+    bool delFromHead(); //из головы
+    bool delFromTail(); // c хвоста
+    bool delAt(uint32_t index); //с позиции
+    bool delKey(const ItemType& key); //по ключу
+    iterator delByIterator(iterator it); //по итератору
+
+    //поиск максимального / минимального элемента
+    ItemType getMax() const; //max
+    ItemType getMin() const; //min
+   
+    bool isEmpty() const; //возвращает true, если список пуст
+
+    void Clear(); //очистка списка
+
+    //присваивание(= )
+    LinkedList<ItemType>& operator=(const LinkedList<ItemType>&); 
 
     //получение ссылки на ключ элемента([])
     ItemType& operator[](uint32_t index);           
@@ -64,35 +94,6 @@ public:
     //сравнение(== , != )
     bool operator==(const LinkedList<ItemType>& other) const; //==
     bool operator!=(const LinkedList<ItemType>& other) const; //!=
-
-    //получение итераторов на начало/конец списка
-    iterator begin(); //итератор на начало
-    iterator end(); //итератор на конец
-
-
-    template<typename Predicate>
-    iterator findIf(Predicate&& PredicateObject); //поиск элемента по ключу
-
-
-    //добавление элемента
-    void addToHead(const ItemType&); //в голову
-    void addToTail(const ItemType&); //в хвост
-    bool insertAt(uint32_t index, const ItemType& value); //на позицию
-    bool addAfter(const ItemType& key, const ItemType& value); //после ключа
-
-    //удаление элемента
-    bool delFromHead(); //из головы
-    bool delFromTail(); // c хвоста
-    bool delAt(uint32_t index); //с позиции
-    bool delKey(const ItemType& key); //по ключу
-    
-    //поиск максимального / минимального элемента
-    ItemType getMax() const; //max
-    ItemType getMin() const; //min
-
-    bool isEmpty() const; //возвращает true, если список пуст
-
-    void Clear(); //очистка списка
 
 private:
 
@@ -180,8 +181,9 @@ uint32_t LinkedList<ItemType>::getSize() const
     return size_;
 }
 
+//обмен содержимого с другим списком(swap)
 template<typename ItemType>
-void LinkedList<ItemType>::swap(LinkedList<ItemType>& other) //обмен содержимого с другим списком(swap)
+void LinkedList<ItemType>::swap(LinkedList<ItemType>& other)
 {
     ListNode* tempHead = headPtr_;
     headPtr_ = other.headPtr_;
@@ -196,9 +198,350 @@ void LinkedList<ItemType>::swap(LinkedList<ItemType>& other) //обмен содержимого
     other.size_ = tempSize;
 }
 
+//получение итераторов на начало/конец списка
+template<typename ItemType>
+typename LinkedList<ItemType>::iterator LinkedList<ItemType>::begin() //итератор на начало
+{
+    return LinkedList<ItemType>::iterator(headPtr_);
+}
+template<typename ItemType>
+typename LinkedList<ItemType>::iterator LinkedList<ItemType>::end() //итератор на конец
+{
+    return LinkedList<ItemType>::iterator(nullptr);
+}
+
+//поиск элемента по ключу
+template<typename ItemType>
+template<typename Predicate>
+typename LinkedList<ItemType>::iterator LinkedList<ItemType>::findIf(Predicate&& predicateObject)
+{
+    LinkedList<ItemType>::iterator it = begin();
+
+    while (it != end())
+    {
+        if (predicateObject(*it)) return it;
+
+        ++it;
+    }
+
+    return LinkedList<ItemType>::iterator(nullptr);
+}
+
+//добавление элемента
+template<typename ItemType>
+void LinkedList<ItemType>::addToHead(const ItemType& value) //в голову
+{
+    LinkedList<ItemType>::ListNode* newNode = new LinkedList<ItemType>::ListNode(value, headPtr_);
+
+    if (headPtr_)
+    {
+        headPtr_->setLinkToPrevNode(newNode);
+    }
+
+    headPtr_ = newNode;
+
+    if (!tailPtr_)
+    {
+        tailPtr_ = newNode;
+    }
+
+    ++size_;
+}
+template<typename ItemType>
+void LinkedList<ItemType>::addToTail(const ItemType& value) //в хвост
+{
+    ListNode* newNode = new ListNode(value, nullptr, tailPtr_);
+
+    if (tailPtr_)
+    {
+        tailPtr_->setLinkToNextNode(newNode);
+    }
+    else
+    {
+        headPtr_ = newNode;
+    }
+
+    tailPtr_ = newNode;
+
+    ++size_;
+}
+template<typename ItemType>
+bool LinkedList<ItemType>::insertAt(uint32_t index, const ItemType& value) //на позицию
+{
+    if (index > size_) return false;
+
+    if (index == 0)
+    {
+        addToHead(value);  
+        return true;
+    }
+    if (index == size_)
+    {
+        addToTail(value);   
+        return true;
+    }
+
+    ListNode* temp = headPtr_;
+    for (uint32_t i = 0; i < index; ++i)
+    {
+        temp = temp->getLinkToNextNode();
+    }
+
+    ListNode* newNode = new ListNode(value, temp, temp->getLinkToPrevNode());
+
+    temp->getLinkToPrevNode()->setLinkToNextNode(newNode);
+    temp->setLinkToPrevNode(newNode);
+
+    ++size_;
+
+    return true;
+}
+template<typename ItemType>
+bool LinkedList<ItemType>::addAfter(const ItemType& key, const ItemType& value) //после ключа
+{
+    ListNode* temp = headPtr_;
+    while (temp != nullptr && temp->getValue() != key)
+    {
+        temp = temp->getLinkToNextNode();
+    }
+
+    if (temp == nullptr) return false;
+
+    ListNode* newNode = new ListNode(value, temp->getLinkToNextNode(), temp);
+
+    if (temp->getLinkToNextNode())
+    {
+        temp->getLinkToNextNode()->setLinkToPrevNode(newNode);
+    }
+    else
+    {
+        tailPtr_ = newNode;
+    }
+
+    temp->setLinkToNextNode(newNode);
+
+    ++size_;
+    return true;
+}
+template<typename ItemType>
+void LinkedList<ItemType>::addByIterator(iterator it, const ItemType& value) //по итератору
+{
+    if (it == end())
+    {
+        addToTail(value);
+        return;
+    }
+
+    ListNode* current = it.getNodePtr();
+
+    ListNode* newNode = new ListNode(value, current, current->getLinkToPrevNode());
+
+    if (current->getLinkToPrevNode())
+    {
+        current->getLinkToPrevNode()->setLinkToNextNode(newNode);
+    }
+    else
+    {
+        headPtr_ = newNode;
+    }
+
+    current->setLinkToPrevNode(newNode);
+
+    ++size_;
+}
+
+//удаление элемента
+template<typename ItemType>
+bool LinkedList<ItemType>::delFromHead() //из головы
+{
+    if (isEmpty()) return false;
+
+    ListNode* temp = headPtr_;
+    headPtr_ = headPtr_->getLinkToNextNode();
+
+    if (headPtr_) headPtr_->setLinkToPrevNode(nullptr);
+    else tailPtr_ = nullptr;
+
+    delete temp;
+    --size_;
+    return true;
+}
+template<typename ItemType>
+bool LinkedList<ItemType>::delFromTail() //с хвоста
+{
+    if (isEmpty()) return false;
+
+    ListNode* temp = tailPtr_;
+
+    tailPtr_ = tailPtr_->getLinkToPrevNode();
+
+    if (tailPtr_)
+    {
+        tailPtr_->setLinkToNextNode(nullptr);
+    }
+    else
+    {
+        headPtr_ = nullptr;
+    }
+
+    delete temp;
+
+    --size_;
+    return true;
+}
+template<typename ItemType>
+bool LinkedList<ItemType>::delAt(uint32_t index) //с позиции
+{
+    if (index >= size_) return false;
+
+    if (index == 0)
+    {
+        return delFromHead();
+    }
+    if (index == size_ - 1)
+    {
+        return delFromTail();
+    }
+
+    ListNode* temp = headPtr_;
+    for (uint32_t i = 0; i < index; ++i)
+    {
+        temp = temp->getLinkToNextNode();
+    }
+
+    ListNode* prevNode = temp->getLinkToPrevNode();
+    ListNode* nextNode = temp->getLinkToNextNode();
+
+    prevNode->setLinkToNextNode(nextNode);
+    nextNode->setLinkToPrevNode(prevNode);
+
+    delete temp;
+
+    --size_;
+    return true;
+}
+template<typename ItemType>
+bool LinkedList<ItemType>::delKey(const ItemType& key) //по ключу
+{
+    ListNode* temp = headPtr_;
+    while (temp != nullptr && temp->getValue() != key)
+    {
+        temp = temp->getLinkToNextNode();
+    }
+
+    if (temp == nullptr) return false;
+
+    if (temp == headPtr_)
+    {
+        return delFromHead();  
+    }
+    if (temp == tailPtr_)
+    {
+        return delFromTail(); 
+    }
+
+    ListNode* prevNode = temp->getLinkToPrevNode();
+    ListNode* nextNode = temp->getLinkToNextNode();
+
+    prevNode->setLinkToNextNode(nextNode);
+    nextNode->setLinkToPrevNode(prevNode);
+
+    delete temp;
+    --size_;
+    return true;
+}
+template<typename ItemType>
+typename LinkedList<ItemType>::iterator LinkedList<ItemType>::delByIterator(iterator it) //по итератору 
+{
+    if (it == end()) return end();
+
+    ListNode* current = it.getNodePtr();
+    ListNode* nextNode = current->getLinkToNextNode();
+
+    if (current->getLinkToPrevNode())
+    {
+        current->getLinkToPrevNode()->setLinkToNextNode(nextNode);
+    }
+    else
+    {
+            headPtr_ = nextNode;
+    }
+
+    if (nextNode)
+    {
+        nextNode->setLinkToPrevNode(current->getLinkToPrevNode());
+    }
+    else
+    {
+         tailPtr_ = current->getLinkToPrevNode();
+    }
+
+    delete current;
+    --size_;
+
+    return iterator(nextNode);
+}
+
+//поиск максимального / минимального элемента
+template<typename ItemType>
+ItemType LinkedList<ItemType>::getMax() const //max
+{
+     assert(!isEmpty() && "List is empty");
+
+    ItemType maxValue = headPtr_->getValue();
+
+    ListNode* temp = headPtr_->getLinkToNextNode();
+    while (temp != nullptr)
+    {
+        if (temp->getValue() > maxValue)
+        {
+            maxValue = temp->getValue();
+        }
+        temp = temp->getLinkToNextNode();
+    }
+
+    return maxValue;
+}
+template<typename ItemType>
+ItemType LinkedList<ItemType>::getMin() const //min
+{
+    assert(!isEmpty() && "List is empty");
+
+    ItemType minValue = headPtr_->getValue();
+
+    ListNode* temp = headPtr_->getLinkToNextNode();
+    while (temp != nullptr)
+    {
+        if (temp->getValue() < minValue)
+        {
+            minValue = temp->getValue();
+        }
+        temp = temp->getLinkToNextNode();
+    }
+
+    return minValue;
+}
+
+//возвращает true, если список пуст
+template<typename ItemType>
+bool LinkedList<ItemType>::isEmpty() const 
+{
+    return size_ == 0;
+}
+
+//очистка списка
+template<typename ItemType>
+void LinkedList<ItemType>::Clear() 
+{
+    while (!isEmpty())  
+    {
+        delFromHead(); 
+    }
+}
+
 //присваивание(= )
 template<typename ItemType>
-LinkedList<ItemType>& LinkedList<ItemType>::operator=(const LinkedList<ItemType>& other) 
+LinkedList<ItemType>& LinkedList<ItemType>::operator=(const LinkedList<ItemType>& other)
 {
     if (this != &other)
     {
@@ -214,6 +557,7 @@ LinkedList<ItemType>& LinkedList<ItemType>::operator=(const LinkedList<ItemType>
 
     return *this;
 }
+
 // получение ссылки на ключ элемента([])
 template<typename ItemType>
 ItemType& LinkedList<ItemType>::operator[](uint32_t index)
@@ -278,298 +622,6 @@ bool LinkedList<ItemType>::operator!=(const LinkedList<ItemType>& other) const /
     }
 
     return false;
-}
-
-//получение итераторов на начало/конец списка
-template<typename ItemType>
-typename LinkedList<ItemType>::iterator LinkedList<ItemType>::begin() //итератор на начало
-{
-    return LinkedList<ItemType>::iterator(headPtr_);
-}
-template<typename ItemType>
-typename LinkedList<ItemType>::iterator LinkedList<ItemType>::end() //итератор на конец
-{
-    return LinkedList<ItemType>::iterator(nullptr);
-}
-
-
-//поиск элемента по ключу
-template<typename ItemType>
-template<typename Predicate>
-typename LinkedList<ItemType>::iterator LinkedList<ItemType>::findIf(Predicate&& predicateObject)
-{
-    LinkedList<ItemType>::iterator it = begin();
-
-    while (it != end())
-    {
-        if (predicateObject(*it)) return it;
-
-        ++it;
-    }
-
-    return LinkedList<ItemType>::iterator(nullptr);
-}
-
-
-//добавление элемента
-template<typename ItemType>
-void LinkedList<ItemType>::addToHead(const ItemType& value) //в голову
-{
-    LinkedList<ItemType>::ListNode* newNode = new LinkedList<ItemType>::ListNode(value, headPtr_);
-
-    if (headPtr_)
-    {
-        headPtr_->setLinkToPrevNode(newNode);
-    }
-
-    headPtr_ = newNode;
-
-    if (!tailPtr_)
-    {
-        tailPtr_ = newNode;
-    }
-
-    ++size_;
-}
-
-template<typename ItemType>
-void LinkedList<ItemType>::addToTail(const ItemType& value) //в хвост
-{
-    ListNode* newNode = new ListNode(value, nullptr, tailPtr_);
-
-    if (tailPtr_)
-    {
-        tailPtr_->setLinkToNextNode(newNode);
-    }
-    else
-    {
-        headPtr_ = newNode;
-    }
-
-    tailPtr_ = newNode;
-
-    ++size_;
-}
-
-template<typename ItemType>
-bool LinkedList<ItemType>::insertAt(uint32_t index, const ItemType& value) //на позицию
-{
-    if (index > size_) return false;
-
-    if (index == 0)
-    {
-        addToHead(value);  
-        return true;
-    }
-    if (index == size_)
-    {
-        addToTail(value);   
-        return true;
-    }
-
-    ListNode* temp = headPtr_;
-    for (uint32_t i = 0; i < index; ++i)
-    {
-        temp = temp->getLinkToNextNode();
-    }
-
-    ListNode* newNode = new ListNode(value, temp, temp->getLinkToPrevNode());
-
-    temp->getLinkToPrevNode()->setLinkToNextNode(newNode);
-    temp->setLinkToPrevNode(newNode);
-
-    ++size_;
-
-    return true;
-}
-
-template<typename ItemType>
-bool LinkedList<ItemType>::addAfter(const ItemType& key, const ItemType& value) //после ключа
-{
-    ListNode* temp = headPtr_;
-    while (temp != nullptr && temp->getValue() != key)
-    {
-        temp = temp->getLinkToNextNode();
-    }
-
-    if (temp == nullptr) return false;
-
-    ListNode* newNode = new ListNode(value, temp->getLinkToNextNode(), temp);
-
-    if (temp->getLinkToNextNode())
-    {
-        temp->getLinkToNextNode()->setLinkToPrevNode(newNode);
-    }
-    else
-    {
-        tailPtr_ = newNode;
-    }
-
-    temp->setLinkToNextNode(newNode);
-
-    ++size_;
-    return true;
-}
-
-
-//удаление элемента
-template<typename ItemType>
-bool LinkedList<ItemType>::delFromHead() //из головы
-{
-    if (isEmpty()) return false;
-
-    ListNode* temp = headPtr_;
-    headPtr_ = headPtr_->getLinkToNextNode();
-
-    if (headPtr_) headPtr_->setLinkToPrevNode(nullptr);
-    else tailPtr_ = nullptr;
-
-    delete temp;
-    --size_;
-    return true;
-}
-
-template<typename ItemType>
-bool LinkedList<ItemType>::delFromTail() //с хвоста
-{
-    if (isEmpty()) return false;
-
-    ListNode* temp = tailPtr_;
-
-    tailPtr_ = tailPtr_->getLinkToPrevNode();
-
-    if (tailPtr_)
-    {
-        tailPtr_->setLinkToNextNode(nullptr);
-    }
-    else
-    {
-        headPtr_ = nullptr;
-    }
-
-    delete temp;
-
-    --size_;
-    return true;
-}
-
-template<typename ItemType>
-bool LinkedList<ItemType>::delAt(uint32_t index) //с позиции
-{
-    if (index >= size_) return false;
-
-    if (index == 0)
-    {
-        return delFromHead();
-    }
-    if (index == size_ - 1)
-    {
-        return delFromTail();
-    }
-
-    ListNode* temp = headPtr_;
-    for (uint32_t i = 0; i < index; ++i)
-    {
-        temp = temp->getLinkToNextNode();
-    }
-
-    ListNode* prevNode = temp->getLinkToPrevNode();
-    ListNode* nextNode = temp->getLinkToNextNode();
-
-    prevNode->setLinkToNextNode(nextNode);
-    nextNode->setLinkToPrevNode(prevNode);
-
-    delete temp;
-
-    --size_;
-    return true;
-}
-
-template<typename ItemType>
-bool LinkedList<ItemType>::delKey(const ItemType& key) //по ключу
-{
-    ListNode* temp = headPtr_;
-    while (temp != nullptr && temp->getValue() != key)
-    {
-        temp = temp->getLinkToNextNode();
-    }
-
-    if (temp == nullptr) return false;
-
-    if (temp == headPtr_)
-    {
-        return delFromHead();  
-    }
-    if (temp == tailPtr_)
-    {
-        return delFromTail(); 
-    }
-
-    ListNode* prevNode = temp->getLinkToPrevNode();
-    ListNode* nextNode = temp->getLinkToNextNode();
-
-    prevNode->setLinkToNextNode(nextNode);
-    nextNode->setLinkToPrevNode(prevNode);
-
-    delete temp;
-    --size_;
-    return true;
-}
-
-//поиск максимального / минимального элемента
-template<typename ItemType>
-ItemType LinkedList<ItemType>::getMax() const //max
-{
-     assert(!isEmpty() && "List is empty");
-
-    ItemType maxValue = headPtr_->getValue();
-
-    ListNode* temp = headPtr_->getLinkToNextNode();
-    while (temp != nullptr)
-    {
-        if (temp->getValue() > maxValue)
-        {
-            maxValue = temp->getValue();
-        }
-        temp = temp->getLinkToNextNode();
-    }
-
-    return maxValue;
-}
-
-template<typename ItemType>
-ItemType LinkedList<ItemType>::getMin() const //min
-{
-    assert(!isEmpty() && "List is empty");
-
-    ItemType minValue = headPtr_->getValue();
-
-    ListNode* temp = headPtr_->getLinkToNextNode();
-    while (temp != nullptr)
-    {
-        if (temp->getValue() < minValue)
-        {
-            minValue = temp->getValue();
-        }
-        temp = temp->getLinkToNextNode();
-    }
-
-    return minValue;
-}
-
-template<typename ItemType>
-bool LinkedList<ItemType>::isEmpty() const //возвращает true, если список пуст
-{
-    return size_ == 0;
-}
-
-template<typename ItemType>
-void LinkedList<ItemType>::Clear() //очистка списка
-{
-    while (!isEmpty())  
-    {
-        delFromHead(); 
-    }
 }
 
 
